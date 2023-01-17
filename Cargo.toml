@@ -1,0 +1,18 @@
+[package]
+name = "openapi"
+version = "0.20.0-beta"
+authors = ["tech@getlago.com"]
+description = "Lago API allows your application to push customer information and metrics (events) from your application to the billing application."
+# Override this license by providing a License Object in the OpenAPI.
+license = "Unlicense"
+edition = "2018"
+
+[dependencies]
+serde = "^1.0"
+serde_derive = "^1.0"
+serde_json = "^1.0"
+url = "^2.2"
+uuid = { version = "^1.0", features = ["serde"] }
+[dependencies.reqwest]
+version = "^0.11"
+features = ["json", "multipart"]
