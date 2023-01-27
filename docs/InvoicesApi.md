@@ -9,6 +9,7 @@ Method | HTTP request | Description
 [**find_all_invoices**](InvoicesApi.md#find_all_invoices) | **GET** /invoices/ | Find all invoices
 [**find_invoice**](InvoicesApi.md#find_invoice) | **GET** /invoices/{id} | Find invoice by ID
 [**refresh_invoice**](InvoicesApi.md#refresh_invoice) | **PUT** /invoices/{id}/refresh | Refresh a draft invoice
+[**retry_payment**](InvoicesApi.md#retry_payment) | **POST** /invoices/{id}/retry_payment | Retry invoice payment
 [**update_invoice**](InvoicesApi.md#update_invoice) | **PUT** /invoices/{id} | Update an existing invoice status
 
 
@@ -155,6 +156,36 @@ Name | Type | Description  | Required | Notes
 ### Return type
 
 [**crate::models::Invoice**](Invoice.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+
+## retry_payment
+
+> retry_payment(id)
+Retry invoice payment
+
+Retry invoice payment
+
+### Parameters
+
+
+Name | Type | Description  | Required | Notes
+------------- | ------------- | ------------- | ------------- | -------------
+**id** | **String** | ID of the existing Lago Invoice | [required] |
+
+### Return type
+
+ (empty response body)
 
 ### Authorization
 
