@@ -96,6 +96,7 @@ pub mod coupons_api;
 pub mod credit_notes_api;
 pub mod customers_api;
 pub mod events_api;
+pub mod fees_api;
 pub mod invoices_api;
 pub mod organizations_api;
 pub mod plans_api;

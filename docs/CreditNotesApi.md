@@ -6,7 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_credit_note**](CreditNotesApi.md#create_credit_note) | **POST** /credit_notes | Create a new Credit note
 [**download_credit_note**](CreditNotesApi.md#download_credit_note) | **POST** /credit_notes/{id}/download | Download an existing credit note
-[**find_all_credit_notes**](CreditNotesApi.md#find_all_credit_notes) | **GET** /credit_notes/ | Find Credit notes
+[**find_all_credit_notes**](CreditNotesApi.md#find_all_credit_notes) | **GET** /credit_notes | Find Credit notes
 [**find_credit_note**](CreditNotesApi.md#find_credit_note) | **GET** /credit_notes/{id} | Find credit note
 [**update_credit_note**](CreditNotesApi.md#update_credit_note) | **PUT** /credit_notes/{id} | Update an existing credit note
 [**void_credit_note**](CreditNotesApi.md#void_credit_note) | **PUT** /credit_notes/{id}/void | Void existing credit note
@@ -55,7 +55,7 @@ Download an existing credit note
 
 Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
-**id** | **String** | ID of the existing Lago Credit note | [required] |
+**id** | **uuid::Uuid** | ID of the existing Lago Credit note | [required] |
 
 ### Return type
 
@@ -178,7 +178,7 @@ Void an existing credit note
 
 Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
-**id** | **String** | ID of the existing Lago Credit note | [required] |
+**id** | **uuid::Uuid** | ID of the existing Lago Credit note | [required] |
 
 ### Return type
 

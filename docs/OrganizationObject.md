@@ -4,15 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**lago_id** | Option<**String**> |  | [optional]
-**name** | Option<**String**> |  | [optional]
-**created_at** | Option<**String**> |  | [optional]
+**lago_id** | Option<[**uuid::Uuid**](uuid::Uuid.md)> |  | [optional]
+**name** | **String** |  | 
+**created_at** | **String** |  | 
 **webhook_url** | Option<**String**> |  | [optional]
 **country** | Option<**String**> |  | [optional]
 **address_line1** | Option<**String**> |  | [optional]
 **address_line2** | Option<**String**> |  | [optional]
 **state** | Option<**String**> |  | [optional]
-**zipode** | Option<**String**> |  | [optional]
+**zipcode** | Option<**String**> |  | [optional]
 **email** | Option<**String**> |  | [optional]
 **city** | Option<**String**> |  | [optional]
 **legal_name** | Option<**String**> |  | [optional]

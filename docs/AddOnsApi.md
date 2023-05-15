@@ -8,7 +8,7 @@ Method | HTTP request | Description
 [**create_add_on**](AddOnsApi.md#create_add_on) | **POST** /add_ons | Create a new add-on
 [**destroy_add_on**](AddOnsApi.md#destroy_add_on) | **DELETE** /add_ons/{code} | Delete an add-on
 [**find_add_on**](AddOnsApi.md#find_add_on) | **GET** /add_ons/{code} | Find add-on by code
-[**find_all_add_ons**](AddOnsApi.md#find_all_add_ons) | **GET** /add_ons/ | Find add-ons
+[**find_all_add_ons**](AddOnsApi.md#find_all_add_ons) | **GET** /add_ons | Find add-ons
 [**update_add_on**](AddOnsApi.md#update_add_on) | **PUT** /add_ons/{code} | Update an existing add-on
 
 
@@ -135,7 +135,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_add_ons
 
-> crate::models::AddOns find_all_add_ons(page, per_page)
+> crate::models::AddOnsPaginated find_all_add_ons(page, per_page)
 Find add-ons
 
 Find all add-ons in certain organisation
@@ -150,7 +150,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**crate::models::AddOns**](AddOns.md)
+[**crate::models::AddOnsPaginated**](AddOnsPaginated.md)
 
 ### Authorization
 

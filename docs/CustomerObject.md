@@ -4,17 +4,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**lago_id** | Option<**String**> |  | [optional]
-**external_id** | Option<**String**> |  | [optional]
+**lago_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
+**external_id** | **String** |  | 
 **name** | Option<**String**> |  | [optional]
-**sequential_id** | Option<**i32**> |  | [optional]
-**slug** | Option<**String**> |  | [optional]
+**sequential_id** | **i32** |  | 
+**slug** | **String** |  | 
 **created_at** | Option<**String**> |  | [optional]
 **country** | Option<**String**> |  | [optional]
 **address_line1** | Option<**String**> |  | [optional]
 **address_line2** | Option<**String**> |  | [optional]
 **state** | Option<**String**> |  | [optional]
-**zipode** | Option<**String**> |  | [optional]
+**zipcode** | Option<**String**> |  | [optional]
 **email** | Option<**String**> |  | [optional]
 **city** | Option<**String**> |  | [optional]
 **url** | Option<**String**> |  | [optional]
@@ -26,6 +26,7 @@ Name | Type | Description | Notes
 **timezone** | Option<**String**> |  | [optional]
 **applicable_timezone** | Option<**String**> |  | [optional]
 **billing_configuration** | Option<[**crate::models::BillingConfigurationCustomer**](BillingConfigurationCustomer.md)> |  | [optional]
+**metadata** | Option<[**Vec<crate::models::CustomerMetadataObject>**](CustomerMetadataObject.md)> |  | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

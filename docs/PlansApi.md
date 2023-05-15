@@ -6,8 +6,8 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_plan**](PlansApi.md#create_plan) | **POST** /plans | Create a new plan
 [**destroy_plan**](PlansApi.md#destroy_plan) | **DELETE** /plans/{code} | Delete a plan
-[**find_all_plans**](PlansApi.md#find_all_plans) | **GET** /plans/ | Find plans
-[**find_plan**](PlansApi.md#find_plan) | **GET** /plans/{code} | Fin plan by code
+[**find_all_plans**](PlansApi.md#find_all_plans) | **GET** /plans | Find plans
+[**find_plan**](PlansApi.md#find_plan) | **GET** /plans/{code} | Find plan by code
 [**update_plan**](PlansApi.md#update_plan) | **PUT** /plans/{code} | Update an existing plan
 
 
@@ -74,7 +74,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_plans
 
-> crate::models::Plans find_all_plans(page, per_page)
+> crate::models::PlansPaginated find_all_plans(page, per_page)
 Find plans
 
 Find all plans in certain organisation
@@ -89,7 +89,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**crate::models::Plans**](Plans.md)
+[**crate::models::PlansPaginated**](PlansPaginated.md)
 
 ### Authorization
 
@@ -106,7 +106,7 @@ Name | Type | Description  | Required | Notes
 ## find_plan
 
 > crate::models::Plan find_plan(code)
-Fin plan by code
+Find plan by code
 
 Return a single plan
 

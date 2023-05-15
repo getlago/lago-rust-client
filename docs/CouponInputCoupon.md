@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **frequency_duration** | Option<**i32**> |  | [optional]
 **expiration_at** | Option<**String**> |  | [optional]
 **expiration** | Option<**String**> | Expiration type | [optional]
+**applies_to** | Option<[**crate::models::CouponInputCouponAppliesTo**](CouponInput_coupon_applies_to.md)> |  | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

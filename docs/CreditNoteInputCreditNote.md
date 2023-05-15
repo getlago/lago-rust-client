@@ -4,12 +4,12 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**invoice_id** | Option<**String**> |  | [optional]
-**reason** | Option<**String**> | Reason | [optional]
+**invoice_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
+**reason** | **String** | Reason | 
 **description** | Option<**String**> |  | [optional]
-**credit_amount_cents** | Option<**i32**> |  | [optional]
-**refund_amount_cents** | Option<**i32**> |  | [optional]
-**items** | Option<[**Vec<crate::models::CreditNoteInputCreditNoteItemsInner>**](CreditNoteInput_credit_note_items_inner.md)> |  | [optional]
+**credit_amount_cents** | **i32** |  | 
+**refund_amount_cents** | **i32** |  | 
+**items** | [**Vec<crate::models::CreditNoteInputCreditNoteItemsInner>**](CreditNoteInput_credit_note_items_inner.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
