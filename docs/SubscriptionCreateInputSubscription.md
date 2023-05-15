@@ -4,10 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**external_customer_id** | Option<**String**> |  | [optional]
-**plan_code** | Option<**String**> |  | [optional]
+**external_customer_id** | **String** |  | 
+**plan_code** | **String** |  | 
 **name** | Option<**String**> |  | [optional]
-**external_id** | Option<**String**> |  | [optional]
+**external_id** | **String** |  | 
 **billing_time** | Option<**String**> | Billing time | [optional]
 **subscription_at** | Option<**String**> |  | [optional]
 

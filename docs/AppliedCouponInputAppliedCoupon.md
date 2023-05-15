@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**external_customer_id** | Option<**String**> |  | [optional]
-**coupon_code** | Option<**String**> |  | [optional]
+**external_customer_id** | **String** |  | 
+**coupon_code** | **String** |  | 
 **frequency** | Option<**String**> | Frequency type | [optional]
 **frequency_duration** | Option<**i32**> |  | [optional]
 **amount_cents** | Option<**i32**> |  | [optional]

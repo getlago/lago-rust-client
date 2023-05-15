@@ -4,17 +4,18 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**lago_id** | Option<**String**> |  | [optional]
-**lago_customer_id** | Option<**String**> |  | [optional]
-**external_customer_id** | Option<**String**> |  | [optional]
-**status** | Option<**String**> | Status | [optional]
-**currency** | Option<**String**> |  | [optional]
+**lago_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
+**lago_customer_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
+**external_customer_id** | **String** |  | 
+**status** | **String** | Status | 
+**currency** | **String** |  | 
 **name** | Option<**String**> |  | [optional]
-**rate_amount** | Option<**f32**> |  | [optional]
-**credits_balance** | Option<**f32**> |  | [optional]
-**balance** | Option<**f32**> |  | [optional]
-**consumed_credits** | Option<**f32**> |  | [optional]
-**created_at** | Option<**String**> |  | [optional]
+**rate_amount** | **f32** |  | 
+**credits_balance** | **f32** |  | 
+**balance** | **f32** |  | 
+**balance_cents** | **i32** |  | 
+**consumed_credits** | **f32** |  | 
+**created_at** | **String** |  | 
 **expiration_at** | Option<**String**> |  | [optional]
 **last_balance_sync_at** | Option<**String**> |  | [optional]
 **last_consumed_credit_at** | Option<**String**> |  | [optional]

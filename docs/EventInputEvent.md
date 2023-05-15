@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**transaction_id** | Option<**String**> |  | [optional]
+**transaction_id** | **String** |  | 
 **external_customer_id** | Option<**String**> |  | [optional]
-**code** | Option<**String**> |  | [optional]
+**code** | **String** |  | 
 **timestamp** | Option<**i32**> |  | [optional]
 **external_subscription_id** | Option<**String**> |  | [optional]
 **properties** | Option<[**serde_json::Value**](.md)> |  | [optional]

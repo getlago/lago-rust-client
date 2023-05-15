@@ -6,7 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_subscription**](SubscriptionsApi.md#create_subscription) | **POST** /subscriptions | Assign a plan to a customer
 [**destroy_subscription**](SubscriptionsApi.md#destroy_subscription) | **DELETE** /subscriptions/{external_id} | Terminate a subscription
-[**find_all_subscriptions**](SubscriptionsApi.md#find_all_subscriptions) | **GET** /subscriptions/ | Find subscriptions
+[**find_all_subscriptions**](SubscriptionsApi.md#find_all_subscriptions) | **GET** /subscriptions | Find subscriptions
 [**update_subscription**](SubscriptionsApi.md#update_subscription) | **PUT** /subscriptions/{external_id} | Update an existing subscription
 
 
@@ -73,7 +73,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_subscriptions
 
-> crate::models::Subscriptions find_all_subscriptions(external_customer_id, page, per_page)
+> crate::models::SubscriptionsPaginated find_all_subscriptions(page, per_page, external_customer_id, plan_code)
 Find subscriptions
 
 Find all suscriptions for certain customer
@@ -83,13 +83,14 @@ Find all suscriptions for certain customer
 
 Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
-**external_customer_id** | **String** | External customer ID | [required] |
 **page** | Option<**i32**> | Number of page |  |
 **per_page** | Option<**i32**> | Number of records per page |  |
+**external_customer_id** | Option<**String**> | External customer ID |  |
+**plan_code** | Option<**String**> | Code of the plan attached to the subscription |  |
 
 ### Return type
 
-[**crate::models::Subscriptions**](Subscriptions.md)
+[**crate::models::SubscriptionsPaginated**](SubscriptionsPaginated.md)
 
 ### Authorization
 

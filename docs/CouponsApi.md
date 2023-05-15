@@ -7,8 +7,8 @@ Method | HTTP request | Description
 [**apply_coupon**](CouponsApi.md#apply_coupon) | **POST** /applied_coupons | Apply a coupon to a customer
 [**create_coupon**](CouponsApi.md#create_coupon) | **POST** /coupons | Create a new coupon
 [**destroy_coupon**](CouponsApi.md#destroy_coupon) | **DELETE** /coupons/{code} | Delete a coupon
-[**find_all_applied_coupons**](CouponsApi.md#find_all_applied_coupons) | **GET** /applied_coupons/ | Find Applied Coupons
-[**find_all_coupons**](CouponsApi.md#find_all_coupons) | **GET** /coupons/ | Find Coupons
+[**find_all_applied_coupons**](CouponsApi.md#find_all_applied_coupons) | **GET** /applied_coupons | Find Applied Coupons
+[**find_all_coupons**](CouponsApi.md#find_all_coupons) | **GET** /coupons | Find Coupons
 [**find_coupon**](CouponsApi.md#find_coupon) | **GET** /coupons/{code} | Find coupon by code
 [**update_coupon**](CouponsApi.md#update_coupon) | **PUT** /coupons/{code} | Update an existing coupon
 
@@ -106,7 +106,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_applied_coupons
 
-> crate::models::AppliedCoupons find_all_applied_coupons(page, per_page, status, external_customer_id)
+> crate::models::AppliedCouponsPaginated find_all_applied_coupons(page, per_page, status, external_customer_id)
 Find Applied Coupons
 
 Find all applied coupons
@@ -123,7 +123,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**crate::models::AppliedCoupons**](AppliedCoupons.md)
+[**crate::models::AppliedCouponsPaginated**](AppliedCouponsPaginated.md)
 
 ### Authorization
 
@@ -139,7 +139,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_coupons
 
-> crate::models::Coupons find_all_coupons(page, per_page)
+> crate::models::CouponsPaginated find_all_coupons(page, per_page)
 Find Coupons
 
 Find all coupons in certain organisation
@@ -154,7 +154,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**crate::models::Coupons**](Coupons.md)
+[**crate::models::CouponsPaginated**](CouponsPaginated.md)
 
 ### Authorization
 

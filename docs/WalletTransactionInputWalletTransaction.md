@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**wallet_id** | Option<**String**> |  | [optional]
+**wallet_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
 **paid_credits** | Option<**f32**> |  | [optional]
 **granted_credits** | Option<**f32**> |  | [optional]
 

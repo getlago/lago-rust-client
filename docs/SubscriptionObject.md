@@ -4,19 +4,19 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**lago_id** | Option<**String**> |  | [optional]
-**external_id** | Option<**String**> |  | [optional]
-**lago_customer_id** | Option<**String**> |  | [optional]
-**external_customer_id** | Option<**String**> |  | [optional]
+**lago_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
+**external_id** | **String** |  | 
+**lago_customer_id** | [**uuid::Uuid**](uuid::Uuid.md) |  | 
+**external_customer_id** | **String** |  | 
 **name** | Option<**String**> |  | [optional]
-**plan_code** | Option<**String**> |  | [optional]
-**status** | Option<**String**> | Subscription status | [optional]
-**billing_time** | Option<**String**> | Billing time | [optional]
-**subscription_at** | Option<**String**> |  | [optional]
-**started_at** | Option<**String**> |  | [optional]
+**plan_code** | **String** |  | 
+**status** | **String** | Subscription status | 
+**billing_time** | **String** | Billing time | 
+**subscription_at** | **String** |  | 
+**started_at** | **String** |  | 
 **terminated_at** | Option<**String**> |  | [optional]
 **canceled_at** | Option<**String**> |  | [optional]
-**created_at** | Option<**String**> |  | [optional]
+**created_at** | **String** |  | 
 **previous_plan_code** | Option<**String**> |  | [optional]
 **next_plan_code** | Option<**String**> |  | [optional]
 **downgrade_plan_date** | Option<**String**> |  | [optional]

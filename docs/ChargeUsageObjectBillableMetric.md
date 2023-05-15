@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**lago_id** | Option<**String**> |  | [optional]
+**lago_id** | Option<[**uuid::Uuid**](uuid::Uuid.md)> |  | [optional]
 **name** | Option<**String**> |  | [optional]
 **code** | Option<**String**> |  | [optional]
 **aggregation_type** | Option<**String**> | Aggregation type | [optional]

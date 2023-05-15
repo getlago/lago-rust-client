@@ -4,10 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | Option<**i32**> |  | [optional]
-**error** | Option<**String**> |  | [optional]
-**code** | Option<**String**> |  | [optional]
-**error_details** | Option<[**serde_json::Value**](.md)> |  | [optional]
+**status** | **i32** |  | 
+**error** | **String** |  | 
+**code** | **String** |  | 
+**error_details** | [**serde_json::Value**](.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

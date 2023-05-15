@@ -7,7 +7,7 @@ Method | HTTP request | Description
 [**create_billable_metric**](BillableMetricsApi.md#create_billable_metric) | **POST** /billable_metrics | Create a new billable metric
 [**destroy_billable_metric**](BillableMetricsApi.md#destroy_billable_metric) | **DELETE** /billable_metrics/{code} | Delete a billable metric
 [**find_all_billable_metric_groups**](BillableMetricsApi.md#find_all_billable_metric_groups) | **GET** /billable_metrics/{code}/groups | Find Billable metric groups
-[**find_all_billable_metrics**](BillableMetricsApi.md#find_all_billable_metrics) | **GET** /billable_metrics/ | Find Billable metrics
+[**find_all_billable_metrics**](BillableMetricsApi.md#find_all_billable_metrics) | **GET** /billable_metrics | Find Billable metrics
 [**find_billable_metric**](BillableMetricsApi.md#find_billable_metric) | **GET** /billable_metrics/{code} | Find billable metric by code
 [**update_billable_metric**](BillableMetricsApi.md#update_billable_metric) | **PUT** /billable_metrics/{code} | Update an existing billable metric
 
@@ -75,7 +75,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_billable_metric_groups
 
-> crate::models::Groups find_all_billable_metric_groups(code, page, per_page)
+> crate::models::GroupsPaginated find_all_billable_metric_groups(code, page, per_page)
 Find Billable metric groups
 
 Find all billable metric groups in certain organisation
@@ -91,7 +91,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**crate::models::Groups**](Groups.md)
+[**crate::models::GroupsPaginated**](GroupsPaginated.md)
 
 ### Authorization
 
@@ -107,7 +107,7 @@ Name | Type | Description  | Required | Notes
 
 ## find_all_billable_metrics
 
-> crate::models::BillableMetrics find_all_billable_metrics(page, per_page)
+> crate::models::BillableMetricsPaginated find_all_billable_metrics(page, per_page)
 Find Billable metrics
 
 Find all billable metrics in certain organisation
@@ -122,7 +122,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**crate::models::BillableMetrics**](BillableMetrics.md)
+[**crate::models::BillableMetricsPaginated**](BillableMetricsPaginated.md)
 
 ### Authorization
 

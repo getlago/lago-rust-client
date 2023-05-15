@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **payment_provider** | Option<**String**> | Payment provider type | [optional]
 **provider_customer_id** | Option<**String**> |  | [optional]
 **sync_with_provider** | Option<**bool**> |  | [optional]
+**document_locale** | Option<**String**> |  | [optional]
 **vat_rate** | Option<**f32**> |  | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

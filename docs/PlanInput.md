@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**plan** | Option<[**crate::models::PlanInputPlan**](PlanInput_plan.md)> |  | [optional]
+**plan** | [**crate::models::PlanInputPlan**](PlanInput_plan.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

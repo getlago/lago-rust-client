@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**group_id** | Option<**String**> |  | [optional]
-**values** | Option<[**serde_json::Value**](.md)> |  | [optional]
+**group_id** | **String** |  | 
+**values** | [**serde_json::Value**](.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
