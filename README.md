@@ -2,6 +2,12 @@
 
 Lago API allows your application to push customer information and metrics (events) from your application to the billing application.
 
+## Current Releases
+
+| Project            | Release Badge                                                                                       |
+|--------------------|-----------------------------------------------------------------------------------------------------|
+| **Lago**           | [![Lago Release](https://img.shields.io/github/v/release/getlago/lago)](https://github.com/getlago/lago/releases) |
+| **Rust API client for openapi**     | [![Rust API client for openapi Release](https://img.shields.io/github/v/release/getlago/lago-rust-client)](https://github.com/getlago/lago-rust-client/releases) |
 
 ## Overview
 
