@@ -1,0 +1,18 @@
+[package]
+name = "lago-client"
+version = "0.1.0"
+edition = "2024"
+authors = ["Lago Team <tech@getlago.com>"]
+description = "Lago API client"
+license = "MIT"
+repository = "https://github.com/getlago/lago-rust-client"
+
+[dependencies]
+lago-types = { path = "../lago-types" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+reqwest = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+url = { workspace = true }

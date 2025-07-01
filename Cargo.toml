@@ -1,18 +1,23 @@
-[package]
-name = "openapi"
-version = "0.32.0-beta"
-authors = ["tech@getlago.com"]
-description = "Lago API allows your application to push customer information and metrics (events) from your application to the billing application."
-# Override this license by providing a License Object in the OpenAPI.
-license = "Unlicense"
-edition = "2018"
+[workspace]
+members = ["lago-types", "lago-client"]
+resolver = "3"
 
-[dependencies]
-serde = "^1.0"
-serde_derive = "^1.0"
-serde_json = "^1.0"
-url = "^2.2"
-uuid = { version = "^1.0", features = ["serde"] }
-[dependencies.reqwest]
-version = "^0.11"
-features = ["json", "multipart"]
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.45", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+thiserror = "2.0"
+anyhow = "1.0"
+uuid = { version = "1.17", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+url = "2.5"
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+authors = ["Lago Team <tech@getlago.com>"]
+license = "MIT"
+repository = "https://github.com/getlago/lago-rust-client"
+description = "Lago Rust API Client"
+homepage = "https://github.com/getlago/lago-rust-client"
