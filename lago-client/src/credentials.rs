@@ -1,61 +1,63 @@
+use lago_types::error::LagoError;
+
 #[derive(Clone)]
 pub struct Credentials {
-  api_key: String,
+    api_key: String,
 }
 
 impl Credentials {
-  pub fn new(api_key: impl Into<String>) -> Self {
-    Self {
-      api_key: api_key.into(),
+    pub fn new(api_key: impl Into<String>) -> Self {
+        Self {
+            api_key: api_key.into(),
+        }
     }
-  }
-
-  pub fn api_key(&self) -> &str {
-    &self.api_key
-  }
+    
+    pub fn api_key(&self) -> &str {
+        &self.api_key
+    }
 }
 
 pub trait CredentialsProvider: Send + Sync {
-  fn provider_credentials(&self) -> Result<Credentials, lago_types::LagoError>;
+    fn provider_credentials(&self) -> Result<Credentials, LagoError>;
 }
 
 #[derive(Clone)]
 pub struct StaticCredentialsProvider {
-  credentials: Credentials,
+    credentials: Credentials,
 }
 
 impl StaticCredentialsProvider {
-  pub fn new(credentials: Credentials) -> Self {
-    Self { credentials }
-  }
+    pub fn new(credentials: Credentials) -> Self {
+        Self { credentials }
+    }
 }
 
 impl CredentialsProvider for StaticCredentialsProvider {
-  fn provider_credentials(&self) -> Result<Credentials, lago_types::LagoError> {
-    Ok(self.credentials.clone())
-  }
+    fn provider_credentials(&self) -> Result<Credentials, LagoError> {
+        Ok(self.credentials.clone())
+    }
 }
 
 pub struct EnvironmentCredentialsProvider;
 
 impl EnvironmentCredentialsProvider {
-  pub fn new() -> Self {
-    Self
-  }
+    pub fn new() -> Self {
+        Self
+    }
 }
 
 impl Default for EnvironmentCredentialsProvider {
-  fn default() -> Self {
-    Self::new()
-  }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CredentialsProvider for EnvironmentCredentialsProvider {
-  fn provider_credentials(&self) -> Result<Credentials, lago_types::LagoError> {
-    std::env::var("LAGO_API_KEY")
-      .map(Credentials::new)
-      .map_err(|_| lago_types::LagoError::Configuration(
-        "LAGO_API_KEY environment variable not found".to_string()
-      ))
-  }
+    fn provider_credentials(&self) -> Result<Credentials, LagoError> {
+        std::env::var("LAGO_API_KEY")
+        .map(Credentials::new)
+        .map_err(|_| LagoError::Configuration(
+            "LAGO_API_KEY environment variable not found".to_string()
+        ))
+    }
 }

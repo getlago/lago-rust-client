@@ -16,3 +16,7 @@ reqwest = { workspace = true }
 thiserror = { workspace = true }
 anyhow = { workspace = true }
 url = { workspace = true }
+
+[dev-dependencies]
+mockito = "1.4"
+tokio-test = "0.4"
