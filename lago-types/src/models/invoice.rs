@@ -25,7 +25,7 @@ pub struct Invoice {
     pub prepaid_credit_amount_cents: i64,
     pub progressive_billing_credit_amount_cents: i64,
     pub total_amount_cents: i64,
-    pub version_number: i32,
+    pub version_number: Option<i32>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub payment_dispute_lost_at: Option<DateTime<Utc>>,
@@ -35,7 +35,7 @@ pub struct Invoice {
     pub self_billed: Option<bool>,
     pub file_url: Option<String>,
     pub customer: Option<Customer>,
-    pub billing_periods: Vec<InvoiceBillingPeriod>,
+    pub billing_periods: Option<Vec<InvoiceBillingPeriod>>,
     pub metadata: Vec<InvoiceMetadata>,
     pub applied_taxes: Vec<InvoiceAppliedTax>,
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
@@ -103,7 +103,7 @@ pub struct InvoiceMetadata {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceAppliedTax {
     pub lago_invoice_id: Uuid,
-    pub fee_amount_cents: i64,
+    pub fee_amount_cents: Option<i64>,
     pub lago_id: Uuid,
     pub lago_tax_id: Uuid,
     pub tax_name: String,

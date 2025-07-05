@@ -20,3 +20,11 @@ url = { workspace = true }
 [dev-dependencies]
 mockito = "1.4"
 tokio-test = "0.4"
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "custom_configuration"
+path = "examples/custom_configuration.rs"

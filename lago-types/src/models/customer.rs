@@ -65,13 +65,13 @@ pub enum CustomerFinalizeZeroAmountInvoice {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomerBillingConfiguration {
-    pub invoice_grace_period: i32,
-    pub payment_provider: CustomerPaymentProvider,
-    pub payment_provider_code: String,
-    pub provider_customer_id: String,
-    pub sync: bool,
-    pub sync_with_provider: bool,
-    pub document_locale: String,
+    pub invoice_grace_period: Option<i32>,
+    pub payment_provider: Option<CustomerPaymentProvider>,
+    pub payment_provider_code: Option<String>,
+    pub provider_customer_id: Option<String>,
+    pub sync: Option<bool>,
+    pub sync_with_provider: Option<bool>,
+    pub document_locale: Option<String>,
     pub provider_payment_methods: Option<Vec<String>>,
 }
 

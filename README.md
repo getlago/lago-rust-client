@@ -1,5 +1,7 @@
 # Lago Rust Client
 
+:warning: This client is under development, it's not ready for production usage.
+
 A Rust client library for interacting with the [Lago](https://www.getlago.com/) API. This library provides a type-safe, async interface for managing customers, subscriptions, invoices, and other billing operations.
 
 ## Overview
