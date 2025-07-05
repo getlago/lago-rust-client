@@ -10,7 +10,8 @@ use crate::client::LagoClient;
 impl LagoClient {
     pub async fn list_invoices(&self, request: Option<ListInvoicesRequest>) -> Result<ListInvoicesResponse> {
         let request = request.unwrap_or_default();
-        let mut url = Url::parse(&format!("{}/invoices", self.config.region().endpoint()))
+        let region = self.config.region()?;
+        let mut url = Url::parse(&format!("{}/invoices", region.endpoint()))
             .map_err(|e| LagoError::Configuration(format!("Invalid URL: {}", e)))?;
 
         let query_params = request.to_query_params();
@@ -28,7 +29,8 @@ impl LagoClient {
     }
 
     pub async fn get_invoice(&self, request: GetInvoiceRequest) -> Result<GetInvoiceResponse> {
-        let url = format!("{}/invoices/{}", self.config.region().endpoint(), request.invoice_id);
+        let region = self.config.region()?;
+        let url = format!("{}/invoices/{}", region.endpoint(), request.invoice_id);
         self.make_request("GET", &url, None::<&()>).await
     }
 }

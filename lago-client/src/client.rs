@@ -140,13 +140,12 @@ impl LagoClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{client, Config, Credentials, Region, RetryConfig, RetryMode};
+    use crate::{Config, Credentials, Region, RetryConfig, RetryMode};
     use lago_types::error::LagoError;
-    use mockito::{Server, Mock};
+    use mockito::{Server};
     use serde::{Deserialize, Serialize};
     use serde_json::json;
     use std::time::Duration;
-    use tokio::time::timeout;
 
     #[derive(Debug, Deserialize, Serialize)]
     struct TestResponse {

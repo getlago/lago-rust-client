@@ -2,7 +2,7 @@ use std::time::Duration;
 use std::sync::Arc;
 
 use super::{
-    region::Region,
+    region::{Region, RegionProvider, EnvironmentRegionProvider, StaticRegionProvider},
     retry::RetryConfig,
     credentials::{
         CredentialsProvider,
@@ -14,7 +14,7 @@ use super::{
 
 #[derive(Clone)]
 pub struct Config {
-    pub(crate) region: Region,
+    pub(crate) region_provider: Arc<dyn RegionProvider>,
     pub(crate) credentials_provider: Arc<dyn CredentialsProvider>,
     pub(crate) timeout: Duration,
     pub(crate) retry_config: RetryConfig,
@@ -26,8 +26,8 @@ impl Config {
         ConfigBuilder::new()
     }
     
-    pub fn region(&self) -> &Region {
-        &self.region
+    pub fn region(&self) -> Result<Region, lago_types::error::LagoError> {
+        self.region_provider.provider_region()
     }
     
     pub fn credentials(&self) -> Result<Credentials, lago_types::error::LagoError> {
@@ -50,7 +50,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            region: Region::default(),
+            region_provider: Arc::new(EnvironmentRegionProvider::new()),
             credentials_provider: Arc::new(EnvironmentCredentialsProvider::new()),
             timeout: Duration::from_secs(30),
             retry_config: RetryConfig::default(),
@@ -60,7 +60,7 @@ impl Default for Config {
 }
 
 pub struct ConfigBuilder {
-    region: Option<Region>,
+    region_provider: Option<Arc<dyn RegionProvider>>,
     credentials_provider: Option<Arc<dyn CredentialsProvider>>,
     timeout: Option<Duration>,
     retry_config: Option<RetryConfig>,
@@ -70,7 +70,7 @@ pub struct ConfigBuilder {
 impl ConfigBuilder {
     pub fn new() -> Self {
         Self {
-            region: None,
+            region_provider: None,
             credentials_provider: None,
             timeout: None,
             retry_config: None,
@@ -79,7 +79,12 @@ impl ConfigBuilder {
     }
     
     pub fn region(mut self, region: Region) -> Self {
-        self.region = Some(region);
+        self.region_provider = Some(Arc::new(StaticRegionProvider::new(region)));
+        self
+    }
+    
+    pub fn region_provider(mut self, provider: Arc<dyn RegionProvider>) -> Self {
+        self.region_provider = Some(provider);
         self
     }
     
@@ -112,7 +117,7 @@ impl ConfigBuilder {
         let default_config = Config::default();
         
         Config {
-            region: self.region.unwrap_or(default_config.region),
+            region_provider: self.region_provider.unwrap_or(default_config.region_provider),
             credentials_provider: self.credentials_provider.unwrap_or(default_config.credentials_provider),
             timeout: self.timeout.unwrap_or(default_config.timeout),
             retry_config: self.retry_config.unwrap_or(default_config.retry_config),
