@@ -132,15 +132,15 @@ impl ListFilters for InvoiceFilters {
         }
 
         if let Some(status) = &self.status {
-            params.push(("status", format!("{:?}", status).to_lowercase()));
+            params.push(("status", format!("{status:?}").to_lowercase()));
         }
         
         if let Some(payment_status) = &self.payment_status {
-            params.push(("payment_status", format!("{:?}", payment_status).to_lowercase()));
+            params.push(("payment_status", format!("{payment_status:?}").to_lowercase()));
         }
 
         if let Some(invoice_type) = &self.invoice_type {
-            params.push(("invoice_type", format!("{:?}", invoice_type).to_lowercase()));
+            params.push(("invoice_type", format!("{invoice_type:?}").to_lowercase()));
         }
 
         params
