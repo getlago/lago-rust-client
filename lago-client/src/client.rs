@@ -81,7 +81,7 @@ impl LagoClient {
                 "POST" => self.http_client.post(url),
                 "PUT" => self.http_client.put(url),
                 "DELETE" => self.http_client.delete(url),
-                _ => return Err(LagoError::Configuration(format!("Unsupported method: {}", method))),
+                _ => return Err(LagoError::Configuration(format!("Unsupported method: {method}"))),
             };
 
             request_builder = request_builder.bearer_auth(credentials.api_key());
@@ -609,7 +609,7 @@ mod tests {
 
         match result.unwrap_err() {
             LagoError::Http(_) => {},
-            other => panic!("Expected HTTP error, got: {:?}", other),
+            other => panic!("Expected HTTP error, got: {other:?}"),
         }
     }
 }
