@@ -9,7 +9,7 @@ documentation = "https://docs.rs/lago-client"
 repository = "https://github.com/getlago/lago-rust-client"
 
 [dependencies]
-lago-types = { path = "../lago-types" }
+lago-types = "0.1.0"
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
