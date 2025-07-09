@@ -10,6 +10,10 @@ use lago_types::{
 
 use crate::{Config, RetryMode};
 
+/// The main client for interacting with the Lago API
+/// 
+/// This client handles HTTP requests, authentication, retries, and error handling
+/// when communicating with the Lago billing API.
 #[derive(Clone)]
 pub struct LagoClient {
     pub(crate) config: Config,
@@ -17,6 +21,13 @@ pub struct LagoClient {
 }
 
 impl LagoClient {
+    /// Creates a new Lago client with the provided configuration
+    /// 
+    /// # Arguments
+    /// * `config` - The configuration settings for the client
+    /// 
+    /// # Returns
+    /// A new instance of `LagoClient`
     pub fn new(config: Config) -> Self {
         let http_client = HttpClient::builder()
             .timeout(config.timeout())
@@ -30,11 +41,30 @@ impl LagoClient {
         }
     }
 
+    /// Creates a new Lago client using default configuration from environment variables
+    /// 
+    /// This method will use default settings and attempt to load credentials
+    /// from environment variables.
+    /// 
+    /// # Returns
+    /// A `Result` containing a new `LagoClient` instance or an error
     pub fn from_env() -> Result<Self> {
         let config = Config::default();
         Ok(Self::new(config))
     }
 
+    /// Makes an HTTP request to the Lago API with automatic retry logic
+    /// 
+    /// This method handles authentication, request serialization, response deserialization,
+    /// error handling, and automatic retries based on the configured retry policy.
+    /// 
+    /// # Arguments
+    /// * `method` - The HTTP method (GET, POST, PUT, DELETE)
+    /// * `url` - The full URL to make the request to
+    /// * `body` - Optional request body that will be serialized as JSON
+    /// 
+    /// # Returns
+    /// A `Result` containing the deserialized response or an error
     pub(crate) async fn make_request<T, B>(&self, method: &str, url: &str, body: Option<&B>) -> Result<T>
     where
         T: DeserializeOwned,
@@ -90,6 +120,16 @@ impl LagoClient {
         }
     }
 
+    /// Processes the HTTP response and converts it to the expected type
+    /// 
+    /// This method handles different HTTP status codes and converts them to appropriate
+    /// error types for the client to handle.
+    /// 
+    /// # Arguments
+    /// * `response` - The HTTP response from the request
+    /// 
+    /// # Returns
+    /// A `Result` containing the deserialized response data or an error
     async fn handle_response<T: DeserializeOwned>(&self, response: Response) -> Result<T> {
         let status = response.status();
 
@@ -116,6 +156,18 @@ impl LagoClient {
         }
     }
 
+    /// Determines whether a request should be retried based on the error type and attempt count
+    /// 
+    /// This method implements the retry logic based on the configured retry policy.
+    /// It will retry on certain error types (HTTP errors, rate limits, server errors)
+    /// but not on client errors or authentication failures.
+    /// 
+    /// # Arguments
+    /// * `error` - The error that occurred during the request
+    /// * `attempt` - The current attempt number (0-based)
+    /// 
+    /// # Returns
+    /// `true` if the request should be retried, `false` otherwise
     fn should_retry(&self, error: &LagoError, attempt: u32) -> bool {
         if attempt >= self.config.retry_config().max_attempts {
             return false;

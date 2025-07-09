@@ -7,7 +7,15 @@ use lago_types::{
 
 use crate::client::LagoClient;
 
+/// Invoice-related operations for the Lago client
 impl LagoClient {
+    /// Retrieves a list of invoices with optional filtering parameters
+    /// 
+    /// # Arguments
+    /// * `request` - Optional filtering parameters for the invoice list
+    /// 
+    /// # Returns
+    /// A `Result` containing the list of invoices or an error
     pub async fn list_invoices(&self, request: Option<ListInvoicesRequest>) -> Result<ListInvoicesResponse> {
         let request = request.unwrap_or_default();
         let region = self.config.region()?;
@@ -28,6 +36,13 @@ impl LagoClient {
         self.make_request("GET", url.as_str(), None::<&()>).await
     }
 
+    /// Retrieves a specific invoice by its ID
+    /// 
+    /// # Arguments
+    /// * `request` - The request containing the invoice ID to retrieve
+    /// 
+    /// # Returns
+    /// A `Result` containing the invoice data or an error
     pub async fn get_invoice(&self, request: GetInvoiceRequest) -> Result<GetInvoiceResponse> {
         let region = self.config.region()?;
         let url = format!("{}/invoices/{}", region.endpoint(), request.invoice_id);
