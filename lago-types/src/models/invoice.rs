@@ -5,6 +5,10 @@ use uuid::Uuid;
 use super::customer::Customer;
 use super::usage_threshold::UsageThreshold;
 
+/// Represents an invoice in the Lago billing system.
+/// 
+/// This struct contains all information about an invoice, including amounts,
+/// payment status, billing periods, and associated metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Invoice {
     pub lago_id: Uuid,
@@ -41,6 +45,7 @@ pub struct Invoice {
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
 }
 
+/// Defines the different types of invoices.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceType {
@@ -51,6 +56,7 @@ pub enum InvoiceType {
     ProgressiveBilling,
 }
 
+/// Defines the current status of an invoice.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceStatus {
@@ -61,6 +67,7 @@ pub enum InvoiceStatus {
     Failed,
 }
 
+/// Defines the payment status of an invoice.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoicePaymentStatus {
@@ -69,6 +76,10 @@ pub enum InvoicePaymentStatus {
     Failed,
 }
 
+/// Represents a billing period associated with an invoice.
+/// 
+/// This struct contains information about the subscription and charge periods
+/// that this invoice covers.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceBillingPeriod {
     pub lago_subscription_id: Uuid,
@@ -81,6 +92,7 @@ pub struct InvoiceBillingPeriod {
     pub lago_plan_id: Uuid,
 }
 
+/// Defines the reason for invoice generation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceInvoicingReason {
@@ -92,6 +104,7 @@ pub enum InvoiceInvoicingReason {
     ProgressiveBilling,
 }
 
+/// Represents custom metadata associated with an invoice.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceMetadata {
     pub lago_id: Uuid,
@@ -100,6 +113,10 @@ pub struct InvoiceMetadata {
     pub created_at: DateTime<Utc>,
 }
 
+/// Represents a tax applied to an invoice.
+/// 
+/// This struct contains information about taxes that have been applied
+/// to the invoice, including the tax details and amounts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceAppliedTax {
     pub lago_invoice_id: Uuid,
@@ -115,6 +132,10 @@ pub struct InvoiceAppliedTax {
     pub created_at: DateTime<Utc>,
 }
 
+/// Represents a usage threshold applied to an invoice.
+/// 
+/// This struct contains information about usage thresholds that have been
+/// triggered and applied to the invoice.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceAppliedUsageThreshold {
     pub lifetimage_usage_amount_cents: i64,

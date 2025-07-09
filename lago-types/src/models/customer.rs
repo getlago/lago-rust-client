@@ -2,6 +2,11 @@ use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
+/// Represents a customer in the Lago billing system.
+/// 
+/// This struct contains all the information about a customer, including
+/// their identification, contact details, billing configuration, and
+/// associated metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Customer {
     pub lago_id: Uuid,
@@ -41,6 +46,7 @@ pub struct Customer {
     pub integration_customers: Vec<CustomerIntegration>,
 }
 
+/// Defines the type of customer account.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerAccountType {
@@ -48,6 +54,7 @@ pub enum CustomerAccountType {
     Partner,
 }
 
+/// Defines the type of customer entity.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerType {
@@ -55,6 +62,7 @@ pub enum CustomerType {
     Individual,
 }
 
+/// Configuration for handling zero-amount invoices.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerFinalizeZeroAmountInvoice {
@@ -63,6 +71,7 @@ pub enum CustomerFinalizeZeroAmountInvoice {
     Skip,
 }
 
+/// Billing configuration settings for a customer.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomerBillingConfiguration {
     pub invoice_grace_period: Option<i32>,
@@ -75,6 +84,7 @@ pub struct CustomerBillingConfiguration {
     pub provider_payment_methods: Option<Vec<String>>,
 }
 
+/// Supported payment providers.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerPaymentProvider {
@@ -83,6 +93,7 @@ pub enum CustomerPaymentProvider {
     Gocardless,
 }
 
+/// Shipping address information for a customer.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomerShippingAddress {
     pub address_line1: Option<String>,
@@ -93,6 +104,7 @@ pub struct CustomerShippingAddress {
     pub zipcode: Option<String>,
 }
 
+/// Custom metadata associated with a customer.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomerMetadata {
     pub lago_id: Uuid,
@@ -102,6 +114,7 @@ pub struct CustomerMetadata {
     pub created_at: DateTime<Utc>,
 }
 
+/// Integration configuration for connecting with third-party systems.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CustomerIntegration {
     pub lago_id: Uuid,
@@ -113,6 +126,7 @@ pub struct CustomerIntegration {
     pub subsidiary_id: String,
 }
 
+/// Supported integration types.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CustomerIntegrationType {
     Netsuite,

@@ -2,6 +2,10 @@ use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
+/// Represents a usage threshold in the Lago billing system.
+/// 
+/// Usage thresholds define spending limits that can trigger notifications
+/// or actions when usage amounts exceed specified thresholds.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UsageThreshold {
   pub lago_id: Uuid,
