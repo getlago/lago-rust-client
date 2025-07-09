@@ -5,6 +5,7 @@ edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Lago API client"
 license = "MIT"
+documentation = "https://docs.rs/lago-client"
 repository = "https://github.com/getlago/lago-rust-client"
 
 [dependencies]

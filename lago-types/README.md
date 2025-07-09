@@ -64,6 +64,24 @@ let params = request.to_query_params();
 - `filters/` - Filter builders for list operations
 - `error.rs` - Error types and handling
 
+## Release
+
+Before publishing a release 
+
+```shell
+cargo check
+cargo test
+cargo doc --no-deps --open
+cargo package
+```
+
+Run the release 
+
+```shell
+cargo login API_KEY
+cargo publish
+```
+
 ## License
 
-This project is licensed under the same license as the parent Lago Rust Client.
+This project is licensed under the MIT License - see the LICENSE file for details.

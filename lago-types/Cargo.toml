@@ -5,6 +5,7 @@ edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Types definitions for Lago API"
 license = "MIT"
+documentation = "https://docs.rs/lago-types"
 repository = "https://github.com/getlago/lago-agent-toolkit"
 
 [dependencies]

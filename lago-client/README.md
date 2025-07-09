@@ -158,6 +158,24 @@ See the `examples/` directory for complete usage examples:
 - `basic_usage.rs` - Basic client usage
 - `custom_configuration.rs` - Advanced configuration options
 
+## Release
+
+Before publishing a release 
+
+```shell
+cargo check
+cargo test
+cargo doc --no-deps --open
+cargo package
+```
+
+Run the release 
+
+```shell
+cargo login API_KEY
+cargo publish
+```
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the same license as the parent Lago Rust Client.
