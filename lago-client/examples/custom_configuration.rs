@@ -13,7 +13,7 @@ use std::time::Duration;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let config = Config::builder()
-    .credentials(Credentials::new("21ff30c7-ffa9-4b9c-aa14-fe5ff08820c9".to_string()))
+    .credentials(Credentials::new("YOUR_API_KEY".to_string()))
     .region(Region::Us)
     .timeout(Duration::from_secs(30))
     .retry_config(

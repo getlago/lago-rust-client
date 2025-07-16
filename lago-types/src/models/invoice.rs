@@ -13,7 +13,7 @@ use super::usage_threshold::UsageThreshold;
 pub struct Invoice {
     pub lago_id: Uuid,
     pub billing_entity_code: Option<String>,
-    pub sequential_id: i32,
+    pub sequential_id: Option<i32>,
     pub number: String,
     pub issuing_date: String,
     pub invoice_type: InvoiceType,

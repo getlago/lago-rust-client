@@ -158,6 +158,14 @@ See the `examples/` directory for complete usage examples:
 - `basic_usage.rs` - Basic client usage
 - `custom_configuration.rs` - Advanced configuration options
 
+```bash
+# Run the basic usage example
+cargo run --example basic_usage
+
+# Run the custom configuration example
+cargo run --example custom_configuration
+```
+
 ## Release
 
 Before publishing a release 
