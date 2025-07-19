@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Metadata information about pagination state.
-/// 
+///
 /// This struct contains information about the current page, total pages,
 /// and navigation to next/previous pages.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,7 +14,7 @@ pub struct PaginationMeta {
 }
 
 /// A paginated response containing data and pagination metadata.
-/// 
+///
 /// This is a generic wrapper for API responses that include pagination,
 /// where `T` represents the type of items in the data array.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,7 +24,7 @@ pub struct PaginatedResponse<T> {
 }
 
 /// Parameters for controlling pagination in API requests.
-/// 
+///
 /// This struct allows specifying which page to retrieve and how many
 /// items per page should be returned.
 #[derive(Debug, Clone, Default)]
@@ -35,7 +35,7 @@ pub struct PaginationParams {
 
 impl PaginationParams {
     /// Creates a new empty pagination parameters instance.
-    /// 
+    ///
     /// # Returns
     /// A new `PaginationParams` instance with no parameters set.
     pub fn new() -> Self {
@@ -43,10 +43,10 @@ impl PaginationParams {
     }
 
     /// Sets the page number to retrieve.
-    /// 
+    ///
     /// # Arguments
     /// * `page` - The page number to retrieve (1-based)
-    /// 
+    ///
     /// # Returns
     /// The modified pagination parameters for method chaining.
     pub fn with_page(mut self, page: i32) -> Self {
@@ -55,10 +55,10 @@ impl PaginationParams {
     }
 
     /// Sets the number of items per page.
-    /// 
+    ///
     /// # Arguments
     /// * `per_page` - The number of items to return per page
-    /// 
+    ///
     /// # Returns
     /// The modified pagination parameters for method chaining.
     pub fn with_per_page(mut self, per_page: i32) -> Self {
@@ -67,7 +67,7 @@ impl PaginationParams {
     }
 
     /// Converts the pagination parameters into HTTP query parameters.
-    /// 
+    ///
     /// # Returns
     /// A vector of query parameter tuples containing the pagination criteria.
     pub fn to_query_params(&self) -> Vec<(&str, String)> {

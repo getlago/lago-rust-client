@@ -1,22 +1,25 @@
-use url::Url;
 use lago_types::{
     error::{LagoError, Result},
-    requests::invoice::{ListInvoicesRequest, GetInvoiceRequest},
-    responses::invoice::{ListInvoicesResponse, GetInvoiceResponse},
+    requests::invoice::{GetInvoiceRequest, ListInvoicesRequest},
+    responses::invoice::{GetInvoiceResponse, ListInvoicesResponse},
 };
+use url::Url;
 
 use crate::client::LagoClient;
 
 /// Invoice-related operations for the Lago client
 impl LagoClient {
     /// Retrieves a list of invoices with optional filtering parameters
-    /// 
+    ///
     /// # Arguments
     /// * `request` - Optional filtering parameters for the invoice list
-    /// 
+    ///
     /// # Returns
     /// A `Result` containing the list of invoices or an error
-    pub async fn list_invoices(&self, request: Option<ListInvoicesRequest>) -> Result<ListInvoicesResponse> {
+    pub async fn list_invoices(
+        &self,
+        request: Option<ListInvoicesRequest>,
+    ) -> Result<ListInvoicesResponse> {
         let request = request.unwrap_or_default();
         let region = self.config.region()?;
         let mut url = Url::parse(&format!("{}/invoices", region.endpoint()))
@@ -37,10 +40,10 @@ impl LagoClient {
     }
 
     /// Retrieves a specific invoice by its ID
-    /// 
+    ///
     /// # Arguments
     /// * `request` - The request containing the invoice ID to retrieve
-    /// 
+    ///
     /// # Returns
     /// A `Result` containing the invoice data or an error
     pub async fn get_invoice(&self, request: GetInvoiceRequest) -> Result<GetInvoiceResponse> {

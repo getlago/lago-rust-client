@@ -1,9 +1,9 @@
-use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 /// Represents a customer in the Lago billing system.
-/// 
+///
 /// This struct contains all the information about a customer, including
 /// their identification, contact details, billing configuration, and
 /// associated metadata.
