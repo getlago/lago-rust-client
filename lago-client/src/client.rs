@@ -403,7 +403,7 @@ mod tests {
                 assert_eq!(status, 404);
                 assert_eq!(message, "Not Found");
             }
-            _ => panic!("Exepected Api Error"),
+            _ => panic!("Expected Api Error"),
         }
 
         mock.assert_async().await;
