@@ -5,7 +5,7 @@ edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Types definitions for Lago API"
 license = "MIT"
-repository = "https://github.com/getlago/lago-agent-toolkit"
+repository = "https://github.com/getlago/lago-rust-client"
 
 [dependencies]
 serde = { workspace = true }
