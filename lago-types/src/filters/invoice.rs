@@ -1,19 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::filters::{
-    common::ListFilters,
-    customer::CustomerFilter,
-    date_range::DateRangeFilter,
-};
+use crate::filters::{common::ListFilters, customer::CustomerFilter, date_range::DateRangeFilter};
 
-use crate::models::{
-    InvoiceStatus,
-    InvoicePaymentStatus,
-    InvoiceType,
-};
+use crate::models::{InvoicePaymentStatus, InvoiceStatus, InvoiceType};
 
 /// Filter parameters for invoice list operations.
-/// 
+///
 /// This struct represents the available filters that can be applied when
 /// querying invoice lists from the API, combining customer, date, status,
 /// and type filters.
@@ -28,7 +20,7 @@ pub struct InvoiceFilters {
 
 impl InvoiceFilters {
     /// Creates a new empty invoice filter.
-    /// 
+    ///
     /// # Returns
     /// A new `InvoiceFilters` instance with no filters set.
     pub fn new() -> Self {
@@ -36,10 +28,10 @@ impl InvoiceFilters {
     }
 
     /// Sets the customer ID filter.
-    /// 
+    ///
     /// # Arguments
     /// * `customer_id` - The external customer ID to filter by
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_customer_id(mut self, customer_id: String) -> Self {
@@ -48,11 +40,11 @@ impl InvoiceFilters {
     }
 
     /// Sets both the start and end dates for the issuing date filter range.
-    /// 
+    ///
     /// # Arguments
     /// * `from` - The start date string for invoice issuing date
     /// * `to` - The end date string for invoice issuing date
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_date_range(mut self, from: String, to: String) -> Self {
@@ -61,10 +53,10 @@ impl InvoiceFilters {
     }
 
     /// Sets the start date for the issuing date filter.
-    /// 
+    ///
     /// # Arguments
     /// * `from` - The start date string for invoice issuing date
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_issuing_date_from(mut self, from: String) -> Self {
@@ -73,10 +65,10 @@ impl InvoiceFilters {
     }
 
     /// Sets the end date for the issuing date filter.
-    /// 
+    ///
     /// # Arguments
     /// * `to` - The end date string for invoice issuing date
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_issuing_date_to(mut self, to: String) -> Self {
@@ -85,10 +77,10 @@ impl InvoiceFilters {
     }
 
     /// Sets the payment status filter.
-    /// 
+    ///
     /// # Arguments
     /// * `payment_status` - The payment status to filter by
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_status(mut self, payment_status: InvoicePaymentStatus) -> Self {
@@ -97,10 +89,10 @@ impl InvoiceFilters {
     }
 
     /// Sets the invoice type filter.
-    /// 
+    ///
     /// # Arguments
     /// * `invoice_type` - The invoice type to filter by
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_invoice_type(mut self, invoice_type: InvoiceType) -> Self {
@@ -111,11 +103,11 @@ impl InvoiceFilters {
 
 impl ListFilters for InvoiceFilters {
     /// Converts the invoice filters into HTTP query parameters.
-    /// 
+    ///
     /// This method combines all the individual filter criteria into a single
     /// vector of query parameters. Date filters are mapped to invoice-specific
     /// parameter names (issuing_date_from, issuing_date_to).
-    /// 
+    ///
     /// # Returns
     /// A vector of query parameter tuples containing all the filter criteria.
     fn to_query_params(&self) -> Vec<(&str, String)> {
@@ -134,9 +126,12 @@ impl ListFilters for InvoiceFilters {
         if let Some(status) = &self.status {
             params.push(("status", format!("{status:?}").to_lowercase()));
         }
-        
+
         if let Some(payment_status) = &self.payment_status {
-            params.push(("payment_status", format!("{payment_status:?}").to_lowercase()));
+            params.push((
+                "payment_status",
+                format!("{payment_status:?}").to_lowercase(),
+            ));
         }
 
         if let Some(invoice_type) = &self.invoice_type {
