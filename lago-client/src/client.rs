@@ -1,17 +1,14 @@
-use std::time::Instant;
 use reqwest::{Client as HttpClient, Response};
 use serde::de::DeserializeOwned;
+use std::time::Instant;
 use tokio::time::sleep;
 
-use lago_types::{
-    error::LagoError,
-    error::Result,
-};
+use lago_types::{error::LagoError, error::Result};
 
 use crate::{Config, RetryMode};
 
 /// The main client for interacting with the Lago API
-/// 
+///
 /// This client handles HTTP requests, authentication, retries, and error handling
 /// when communicating with the Lago billing API.
 #[derive(Clone)]
@@ -22,10 +19,10 @@ pub struct LagoClient {
 
 impl LagoClient {
     /// Creates a new Lago client with the provided configuration
-    /// 
+    ///
     /// # Arguments
     /// * `config` - The configuration settings for the client
-    /// 
+    ///
     /// # Returns
     /// A new instance of `LagoClient`
     pub fn new(config: Config) -> Self {
@@ -42,10 +39,10 @@ impl LagoClient {
     }
 
     /// Creates a new Lago client using default configuration from environment variables
-    /// 
+    ///
     /// This method will use default settings and attempt to load credentials
     /// from environment variables.
-    /// 
+    ///
     /// # Returns
     /// A `Result` containing a new `LagoClient` instance or an error
     pub fn from_env() -> Result<Self> {
@@ -54,18 +51,23 @@ impl LagoClient {
     }
 
     /// Makes an HTTP request to the Lago API with automatic retry logic
-    /// 
+    ///
     /// This method handles authentication, request serialization, response deserialization,
     /// error handling, and automatic retries based on the configured retry policy.
-    /// 
+    ///
     /// # Arguments
     /// * `method` - The HTTP method (GET, POST, PUT, DELETE)
     /// * `url` - The full URL to make the request to
     /// * `body` - Optional request body that will be serialized as JSON
-    /// 
+    ///
     /// # Returns
     /// A `Result` containing the deserialized response or an error
-    pub(crate) async fn make_request<T, B>(&self, method: &str, url: &str, body: Option<&B>) -> Result<T>
+    pub(crate) async fn make_request<T, B>(
+        &self,
+        method: &str,
+        url: &str,
+        body: Option<&B>,
+    ) -> Result<T>
     where
         T: DeserializeOwned,
         B: serde::Serialize,
@@ -81,7 +83,11 @@ impl LagoClient {
                 "POST" => self.http_client.post(url),
                 "PUT" => self.http_client.put(url),
                 "DELETE" => self.http_client.delete(url),
-                _ => return Err(LagoError::Configuration(format!("Unsupported method: {method}"))),
+                _ => {
+                    return Err(LagoError::Configuration(format!(
+                        "Unsupported method: {method}"
+                    )));
+                }
             };
 
             request_builder = request_builder.bearer_auth(credentials.api_key());
@@ -121,13 +127,13 @@ impl LagoClient {
     }
 
     /// Processes the HTTP response and converts it to the expected type
-    /// 
+    ///
     /// This method handles different HTTP status codes and converts them to appropriate
     /// error types for the client to handle.
-    /// 
+    ///
     /// # Arguments
     /// * `response` - The HTTP response from the request
-    /// 
+    ///
     /// # Returns
     /// A `Result` containing the deserialized response data or an error
     async fn handle_response<T: DeserializeOwned>(&self, response: Response) -> Result<T> {
@@ -137,16 +143,17 @@ impl LagoClient {
             let text = response.text().await.map_err(LagoError::Http)?;
             serde_json::from_str(&text).map_err(LagoError::Serialization)
         } else {
-            let error_text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+            let error_text = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
 
             match status.as_u16() {
                 401 => Err(LagoError::Unauthorized),
-                404 => {
-                    Err(LagoError::Api {
-                        status: status.as_u16(),
-                        message: error_text,
-                    })
-                },
+                404 => Err(LagoError::Api {
+                    status: status.as_u16(),
+                    message: error_text,
+                }),
                 429 => Err(LagoError::RateLimit),
                 _ => Err(LagoError::Api {
                     status: status.as_u16(),
@@ -157,15 +164,15 @@ impl LagoClient {
     }
 
     /// Determines whether a request should be retried based on the error type and attempt count
-    /// 
+    ///
     /// This method implements the retry logic based on the configured retry policy.
     /// It will retry on certain error types (HTTP errors, rate limits, server errors)
     /// but not on client errors or authentication failures.
-    /// 
+    ///
     /// # Arguments
     /// * `error` - The error that occurred during the request
     /// * `attempt` - The current attempt number (0-based)
-    /// 
+    ///
     /// # Returns
     /// `true` if the request should be retried, `false` otherwise
     fn should_retry(&self, error: &LagoError, attempt: u32) -> bool {
@@ -180,21 +187,18 @@ impl LagoClient {
         match error {
             LagoError::Http(_) => true,
             LagoError::RateLimit => true,
-            LagoError::Api { status, .. } => {
-                *status >= 500
-            },
+            LagoError::Api { status, .. } => *status >= 500,
             _ => false,
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{Config, Credentials, Region, RetryConfig, RetryMode};
     use lago_types::error::LagoError;
-    use mockito::{Server};
+    use mockito::Server;
     use serde::{Deserialize, Serialize};
     use serde_json::json;
     use std::time::Duration;
@@ -254,22 +258,24 @@ mod tests {
     #[tokio::test]
     async fn test_successful_get_request() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(200)
             .with_header("content-type", "application/json")
-            .with_body(json!({
-                "id": "123",
-                "name": "Test"
-            }).to_string())
+            .with_body(
+                json!({
+                    "id": "123",
+                    "name": "Test"
+                })
+                .to_string(),
+            )
             .create_async()
             .await;
-        
+
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_ok());
 
@@ -283,27 +289,31 @@ mod tests {
     #[tokio::test]
     async fn test_successful_post_request() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("POST", "/test")
+        let mock = server
+            .mock("POST", "/test")
             .with_status(201)
             .with_header("content-type", "application/json")
             .match_body(mockito::Matcher::Json(json!({
                 "name": "New Item"
             })))
-            .with_body(json!({
-                "id": "456",
-                "name": "New Item"
+            .with_body(
+                json!({
+                    "id": "456",
+                    "name": "New Item"
 
-            }).to_string())
+                })
+                .to_string(),
+            )
             .create_async()
             .await;
 
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
-        let request = TestRequest { name: "New Item".to_string() };
+        let request = TestRequest {
+            name: "New Item".to_string(),
+        };
 
-        let result: Result<TestResponse> = client
-            .make_request("POST", &url, Some(&request))
-            .await;
+        let result: Result<TestResponse> = client.make_request("POST", &url, Some(&request)).await;
 
         assert!(result.is_ok());
 
@@ -317,7 +327,8 @@ mod tests {
     #[tokio::test]
     async fn test_authentication_header() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .match_header("Authorization", "Bearer test-api-key")
             .with_status(200)
             .with_body(json!({"id": "123", "name": "Test"}).to_string())
@@ -327,9 +338,7 @@ mod tests {
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let _result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let _result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         mock.assert_async().await;
     }
@@ -340,16 +349,14 @@ mod tests {
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("PATCH", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("PATCH", &url, None::<&()>).await;
 
         assert!(result.is_err());
 
         match result.unwrap_err() {
             LagoError::Configuration(msg) => {
                 assert!(msg.contains("Unsupported method: PATCH"));
-            },
+            }
             _ => panic!("Expected Configuration error"),
         }
     }
@@ -357,7 +364,8 @@ mod tests {
     #[tokio::test]
     async fn test_unauthorized_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(401)
             .with_body("Unauthorized")
             .create_async()
@@ -366,14 +374,12 @@ mod tests {
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
 
         match result.unwrap_err() {
-            LagoError::Unauthorized => {},
+            LagoError::Unauthorized => {}
             _ => panic!("Expected Unauthorized error"),
         }
 
@@ -383,7 +389,8 @@ mod tests {
     #[tokio::test]
     async fn test_not_found_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(404)
             .with_body("Not Found")
             .create_async()
@@ -392,9 +399,7 @@ mod tests {
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
 
@@ -412,7 +417,8 @@ mod tests {
     #[tokio::test]
     async fn test_rate_limit_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(429)
             .with_body("Rate Limited")
             .create_async()
@@ -421,9 +427,7 @@ mod tests {
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
 
@@ -438,18 +442,17 @@ mod tests {
     #[tokio::test]
     async fn test_server_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(500)
             .with_body("Internal Server Error")
             .create_async()
             .await;
-    
+
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
 
@@ -457,7 +460,7 @@ mod tests {
             LagoError::Api { status, message } => {
                 assert_eq!(status, 500);
                 assert_eq!(message, "Internal Server Error");
-            },
+            }
             _ => panic!("Expected Api Error"),
         }
 
@@ -467,7 +470,8 @@ mod tests {
     #[tokio::test]
     async fn test_json_deserialization_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(200)
             .with_body("invalid json")
             .create_async()
@@ -476,9 +480,7 @@ mod tests {
         let client = create_test_client(&server.url());
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
 
@@ -493,7 +495,8 @@ mod tests {
     #[tokio::test]
     async fn test_retry_on_server_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(500)
             .with_body("Server Error")
             .expect(4)
@@ -503,9 +506,7 @@ mod tests {
         let client = create_retry_client(&server.url(), 3);
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
         mock.assert_async().await;
@@ -515,14 +516,16 @@ mod tests {
     async fn test_retry_then_success() {
         let mut server = Server::new_async().await;
 
-        let mock_fail = server.mock("GET", "/test")
+        let mock_fail = server
+            .mock("GET", "/test")
             .with_status(500)
             .with_body("Server Error")
             .expect(2)
             .create_async()
             .await;
 
-        let mock_success = server.mock("GET", "/test")
+        let mock_success = server
+            .mock("GET", "/test")
             .with_status(200)
             .with_body(json!({"id": "123", "name": "Success"}).to_string())
             .expect(1)
@@ -532,9 +535,7 @@ mod tests {
         let client = create_retry_client(&server.url(), 5);
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_ok());
 
@@ -549,7 +550,8 @@ mod tests {
     #[tokio::test]
     async fn test_no_retry_on_client_error() {
         let mut server = Server::new_async().await;
-        let mock = server.mock("GET", "/test")
+        let mock = server
+            .mock("GET", "/test")
             .with_status(400)
             .with_body("Bad Request")
             .expect(1)
@@ -559,9 +561,7 @@ mod tests {
         let client = create_retry_client(&server.url(), 3);
         let url = format!("{}/test", server.url());
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", &url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
 
         assert!(result.is_err());
         mock.assert_async().await;
@@ -574,10 +574,16 @@ mod tests {
         let rate_limit_error = LagoError::RateLimit;
         assert!(client.should_retry(&rate_limit_error, 1));
 
-        let server_error = LagoError::Api { status: 500, message: "Server Error".to_string() };
+        let server_error = LagoError::Api {
+            status: 500,
+            message: "Server Error".to_string(),
+        };
         assert!(client.should_retry(&server_error, 1));
 
-        let client_error = LagoError::Api { status: 400, message: "Bad Request".to_string() };
+        let client_error = LagoError::Api {
+            status: 400,
+            message: "Bad Request".to_string(),
+        };
         assert!(!client.should_retry(&client_error, 1));
 
         assert!(!client.should_retry(&server_error, 3));
@@ -594,21 +600,19 @@ mod tests {
         // Test timeout by using an unreachable address that will cause a timeout
         let config = Config::builder()
             .credentials(Credentials::new("test-api-key".to_string()))
-            .region(Region::Custom("http://10.255.255.1:80".to_string())) 
+            .region(Region::Custom("http://10.255.255.1:80".to_string()))
             .timeout(Duration::from_millis(100))
             .build();
 
         let client = LagoClient::new(config);
         let url = "http://10.255.255.1:80/test";
 
-        let result: Result<TestResponse> = client
-            .make_request("GET", url, None::<&()>)
-            .await;
+        let result: Result<TestResponse> = client.make_request("GET", url, None::<&()>).await;
 
         assert!(result.is_err());
 
         match result.unwrap_err() {
-            LagoError::Http(_) => {},
+            LagoError::Http(_) => {}
             other => panic!("Expected HTTP error, got: {other:?}"),
         }
     }

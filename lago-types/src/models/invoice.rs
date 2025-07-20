@@ -1,12 +1,12 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::customer::Customer;
 use super::usage_threshold::UsageThreshold;
 
 /// Represents an invoice in the Lago billing system.
-/// 
+///
 /// This struct contains all information about an invoice, including amounts,
 /// payment status, billing periods, and associated metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,7 +77,7 @@ pub enum InvoicePaymentStatus {
 }
 
 /// Represents a billing period associated with an invoice.
-/// 
+///
 /// This struct contains information about the subscription and charge periods
 /// that this invoice covers.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,7 +114,7 @@ pub struct InvoiceMetadata {
 }
 
 /// Represents a tax applied to an invoice.
-/// 
+///
 /// This struct contains information about taxes that have been applied
 /// to the invoice, including the tax details and amounts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -133,7 +133,7 @@ pub struct InvoiceAppliedTax {
 }
 
 /// Represents a usage threshold applied to an invoice.
-/// 
+///
 /// This struct contains information about usage thresholds that have been
 /// triggered and applied to the invoice.
 #[derive(Debug, Clone, Serialize, Deserialize)]

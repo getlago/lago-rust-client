@@ -1,10 +1,9 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::filters::common::ListFilters;
 
-
 /// Filter parameters for date range operations.
-/// 
+///
 /// This struct represents date range filters that can be applied when
 /// querying resources from the API within a specific time period.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -15,7 +14,7 @@ pub struct DateRangeFilter {
 
 impl DateRangeFilter {
     /// Create a new empty date range filter.
-    /// 
+    ///
     /// # Returns
     /// A new `DateRangeFilter` instance with no date filters set.
     pub fn new() -> Self {
@@ -23,11 +22,11 @@ impl DateRangeFilter {
     }
 
     /// Sets both the start and end dates for the filter range.
-    /// 
+    ///
     /// # Arguments
     /// * `from` - The start date string
     /// * `to` - The end date string
-    /// 
+    ///
     /// # Returns
     /// The modifier filter instance for method chaining.
     pub fn with_date_range(mut self, from: String, to: String) -> Self {
@@ -37,10 +36,10 @@ impl DateRangeFilter {
     }
 
     /// Sets the start date for the filter range.
-    /// 
+    ///
     /// # Arguments
     /// * `from`- The start date string
-    /// 
+    ///
     /// # Returns
     /// The modified filter instance for method chaining.
     pub fn with_from_date(mut self, from: String) -> Self {
@@ -49,10 +48,10 @@ impl DateRangeFilter {
     }
 
     /// Sets the end date for the filter range.
-    /// 
+    ///
     /// # Arguments
     /// * `to` - The end date string
-    /// 
+    ///
     /// # Returns
     /// The modified filter intance for method chaining.
     pub fn with_to_date(mut self, to: String) -> Self {
@@ -61,10 +60,9 @@ impl DateRangeFilter {
     }
 }
 
-
 impl ListFilters for DateRangeFilter {
     /// Converts the date range filter into HTTP query parameters.
-    /// 
+    ///
     /// # Returns
     /// A vector of query parameter tuples containing the date range criteria.
     fn to_query_params(&self) -> Vec<(&str, String)> {
