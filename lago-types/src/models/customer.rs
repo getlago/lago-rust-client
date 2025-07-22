@@ -128,7 +128,7 @@ pub struct CustomerIntegration {
 
 /// Supported integration types.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum CustomerIntegrationType {
     Netsuite,
     Anrok,
