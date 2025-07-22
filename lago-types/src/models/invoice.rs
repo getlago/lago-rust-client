@@ -138,7 +138,7 @@ pub struct InvoiceAppliedTax {
 /// triggered and applied to the invoice.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceAppliedUsageThreshold {
-    pub lifetime_usage_amount_cents: i64,
+    pub lifetime_usage_amount_cents: Option<i64>,
     pub created_at: DateTime<Utc>,
     pub usage_threshold: UsageThreshold,
 }

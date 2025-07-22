@@ -32,7 +32,7 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
 lago-client = "0.1.0"
-lago-types = "0.1.0"
+lago-types = "0.1.2"
 ```
 
 ## Quick Start
