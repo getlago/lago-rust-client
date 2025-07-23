@@ -62,7 +62,7 @@ use lago_types::{
 };
 
 // Parse enum values from strings
-let status = InvoiceStatus = "finalized".parse().unwrap();
+let status: InvoiceStatus = "finalized".parse().unwrap();
 let payment_status: InvoicePaymentStatus = "pending".parse().unwrap();
 let invoice_type = InvoiceType::from_str("subscription").unwrap();
 
