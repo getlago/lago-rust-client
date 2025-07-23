@@ -62,6 +62,7 @@ use lago_types::{
 };
 
 // Parse enum values from strings
+let status = InvoiceStatus = "finalized".parse().unwrap();
 let payment_status: InvoicePaymentStatus = "pending".parse().unwrap();
 let invoice_type = InvoiceType::from_str("subscription").unwrap();
 
@@ -75,7 +76,8 @@ let request = ListInvoicesRequest::new()
     .with_filters(
         InvoiceFilters::new()
             .with_customer_id("customer_123".to_string())
-            .with_status(payment_status)
+            .with_status(status)
+            .with_payment_status(payment_status)
             .with_invoice_type(invoice_type)
     );
 
