@@ -76,14 +76,26 @@ impl InvoiceFilters {
         self
     }
 
-    /// Sets the payment status filter.
+    /// Sets the status filter.
+    ///
+    /// # Arguments
+    /// * `status` - The invoice status to filter by
+    ///
+    /// # Returns
+    /// The modified filter instance for method chaining.
+    pub fn with_status(mut self, status: InvoiceStatus) -> Self {
+        self.status = Some(status);
+        self
+    }
+
+    /// Sets the payment status filter
     ///
     /// # Arguments
     /// * `payment_status` - The payment status to filter by
     ///
     /// # Returns
     /// The modified filter instance for method chaining.
-    pub fn with_status(mut self, payment_status: InvoicePaymentStatus) -> Self {
+    pub fn with_payment_status(mut self, payment_status: InvoicePaymentStatus) -> Self {
         self.payment_status = Some(payment_status);
         self
     }
