@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 use uuid::Uuid;
-use strum_macros::{EnumString};
 
 /// Represents a customer in the Lago billing system.
 ///

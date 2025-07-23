@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 use uuid::Uuid;
-use strum_macros::{EnumString};
 
 use super::customer::Customer;
 use super::usage_threshold::UsageThreshold;
@@ -46,7 +46,7 @@ pub struct Invoice {
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, EnumString)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceType {
     #[strum(serialize = "subscription")]

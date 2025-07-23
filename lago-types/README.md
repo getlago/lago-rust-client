@@ -30,7 +30,7 @@ The library provides convenient `FromStr` implementations for all enums, allowin
 
 ```rust
 use std::str::FromStr;
-use lago_types::models::{InvoiceType, InvoiceStatus, InvoicePaymentStatus};
+use lago_types::models::{InvoiceType};
 
 // Using FromStr::from_str()
 let invoice_type = InvoiceType::from_str("subscription").unwrap();
