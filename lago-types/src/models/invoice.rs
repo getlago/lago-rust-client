@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 use uuid::Uuid;
 
 use super::customer::Customer;
@@ -45,9 +46,9 @@ pub struct Invoice {
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
 }
 
-/// Defines the different types of invoices.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum InvoiceType {
     Subscription,
     AddOn,
@@ -57,8 +58,9 @@ pub enum InvoiceType {
 }
 
 /// Defines the current status of an invoice.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum InvoiceStatus {
     Draft,
     Finalized,
@@ -68,8 +70,9 @@ pub enum InvoiceStatus {
 }
 
 /// Defines the payment status of an invoice.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum InvoicePaymentStatus {
     Pending,
     Succeeded,
@@ -93,8 +96,9 @@ pub struct InvoiceBillingPeriod {
 }
 
 /// Defines the reason for invoice generation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum InvoiceInvoicingReason {
     SubscriptionStarting,
     SubscriptionPeriodic,

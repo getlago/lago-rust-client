@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
 use uuid::Uuid;
 
 /// Represents a customer in the Lago billing system.
@@ -47,24 +48,27 @@ pub struct Customer {
 }
 
 /// Defines the type of customer account.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum CustomerAccountType {
     Customer,
     Partner,
 }
 
 /// Defines the type of customer entity.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum CustomerType {
     Company,
     Individual,
 }
 
 /// Configuration for handling zero-amount invoices.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum CustomerFinalizeZeroAmountInvoice {
     Inherit,
     Finalize,
@@ -85,8 +89,9 @@ pub struct CustomerBillingConfiguration {
 }
 
 /// Supported payment providers.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum CustomerPaymentProvider {
     Stripe,
     Adyen,
@@ -127,8 +132,9 @@ pub struct CustomerIntegration {
 }
 
 /// Supported integration types.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum CustomerIntegrationType {
     Netsuite,
     Anrok,
