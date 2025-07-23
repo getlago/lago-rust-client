@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use strum_macros::{EnumString};
 
 use super::customer::Customer;
 use super::usage_threshold::UsageThreshold;
@@ -45,34 +46,46 @@ pub struct Invoice {
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
 }
 
-/// Defines the different types of invoices.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceType {
+    #[strum(serialize = "subscription")]
     Subscription,
+    #[strum(serialize = "add_on")]
     AddOn,
+    #[strum(serialize = "credit")]
     Credit,
+    #[strum(serialize = "one_off")]
     OneOff,
+    #[strum(serialize = "progressive_billing")]
     ProgressiveBilling,
 }
 
 /// Defines the current status of an invoice.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceStatus {
+    #[strum(serialize = "draft")]
     Draft,
+    #[strum(serialize = "finalized")]
     Finalized,
+    #[strum(serialize = "voided")]
     Voided,
+    #[strum(serialize = "pending")]
     Pending,
+    #[strum(serialize = "failed")]
     Failed,
 }
 
 /// Defines the payment status of an invoice.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoicePaymentStatus {
+    #[strum(serialize = "pending")]
     Pending,
+    #[strum(serialize = "succeeded")]
     Succeeded,
+    #[strum(serialize = "failed")]
     Failed,
 }
 
@@ -93,14 +106,20 @@ pub struct InvoiceBillingPeriod {
 }
 
 /// Defines the reason for invoice generation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum InvoiceInvoicingReason {
+    #[strum(serialize = "subscription_starting")]
     SubscriptionStarting,
+    #[strum(serialize = "subscription_periodic")]
     SubscriptionPeriodic,
+    #[strum(serialize = "subscription_terminating")]
     SubscriptionTerminating,
+    #[strum(serialize = "in_advance_charge")]
     InAdvanceCharge,
+    #[strum(serialize = "in_advance_charge_periodic")]
     InAdvanceChargePeriodic,
+    #[strum(serialize = "progressive_billing")]
     ProgressiveBilling,
 }
 

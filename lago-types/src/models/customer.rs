@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use strum_macros::{EnumString};
 
 /// Represents a customer in the Lago billing system.
 ///
@@ -47,27 +48,34 @@ pub struct Customer {
 }
 
 /// Defines the type of customer account.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerAccountType {
+    #[strum(serialize = "customer")]
     Customer,
+    #[strum(serialize = "partner")]
     Partner,
 }
 
 /// Defines the type of customer entity.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerType {
+    #[strum(serialize = "company")]
     Company,
+    #[strum(serialize = "individual")]
     Individual,
 }
 
 /// Configuration for handling zero-amount invoices.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerFinalizeZeroAmountInvoice {
+    #[strum(serialize = "inherit")]
     Inherit,
+    #[strum(serialize = "finalize")]
     Finalize,
+    #[strum(serialize = "skip")]
     Skip,
 }
 
@@ -85,11 +93,14 @@ pub struct CustomerBillingConfiguration {
 }
 
 /// Supported payment providers.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerPaymentProvider {
+    #[strum(serialize = "stripe")]
     Stripe,
+    #[strum(serialize = "adyen")]
     Adyen,
+    #[strum(serialize = "gocardless")]
     Gocardless,
 }
 
@@ -127,9 +138,11 @@ pub struct CustomerIntegration {
 }
 
 /// Supported integration types.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 pub enum CustomerIntegrationType {
+    #[strum(serialize = "netsuite")]
     Netsuite,
+    #[strum(serialize = "anrok")]
     Anrok,
 }

@@ -16,9 +16,30 @@ This crate contains all the type definitions needed to interact with the Lago bi
 
 - **Type Safety**: Strongly typed structs and enums for all API interactions
 - **Serialization**: Full serde support for JSON serialization/deserialization
+- **String Parsing**: Built-in `FromStr` implementations for enums to parse from string representations
 - **Filtering**: Composable filter builders for list queries
 - **Pagination**: Built-in pagination support with metadata
 - **Documentation**: Comprehensive documentation for all public APIs
+
+## String to Enum Conversion
+
+The library provides convenient `FromStr` implementations for all enums, allowing easy conversion from string representations to typed enum values. This is particularly useful when working with external APIs or user input.
+
+
+### Usage Examples
+
+```rust
+use std::str::FromStr;
+use lago_types::models::{InvoiceType, InvoiceStatus, InvoicePaymentStatus};
+
+// Using FromStr::from_str()
+let invoice_type = InvoiceType::from_str("subscription").unwrap();
+assert_eq!(invoice_type, InvoiceType::Subscription);
+
+// Error handling for invalid values
+let result: Result<InvoiceType, _> = "invalid_type".parse();
+assert!(result.is_err());
+```
 
 ## Usage
 
@@ -32,12 +53,17 @@ lago-types = { path = "../lago-types" }
 ### Basic Example
 
 ```rust
+use std::str::FromStr;
 use lago_types::{
-    models::{Customer, Invoice},
+    models::{Customer, Invoice, InvoicePaymentStatus, InvoiceType},
     requests::ListInvoicesRequest,
     filters::InvoiceFilters,
     models::PaginationParams,
 };
+
+// Parse enum values from strings
+let payment_status: InvoicePaymentStatus = "pending".parse().unwrap();
+let invoice_type = InvoiceType::from_str("subscription").unwrap();
 
 // Create a request to list invoices with filters
 let request = ListInvoicesRequest::new()
@@ -49,7 +75,8 @@ let request = ListInvoicesRequest::new()
     .with_filters(
         InvoiceFilters::new()
             .with_customer_id("customer_123".to_string())
-            .with_status(InvoicePaymentStatus::Pending)
+            .with_status(payment_status)
+            .with_invoice_type(invoice_type)
     );
 
 // Convert to query parameters
