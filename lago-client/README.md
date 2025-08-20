@@ -17,7 +17,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-lago-client = "0.1.0"
+lago-client = "0.1.4"
 ```
 
 ## Quick Start
@@ -125,6 +125,65 @@ let request = GetInvoiceRequest::new("invoice-id");
 let invoice = client.get_invoice(request).await?;
 ```
 
+### Billable Metrics
+
+```rust
+use lago_types::{
+    models::{BillableMetricAggregationType, BillableMetricFilter},
+    requests::billable_metric::{CreateBillableMetricInput, CreateBillableMetricRequest},
+};
+
+// Create a billable metric
+let metric = CreateBillableMetricInput::new(
+    "Storage Usage".to_string(),
+    "storage_gb".to_string(),
+    BillableMetricAggregationType::SumAgg,
+)
+.with_description("Tracks storage usage".to_string())
+.with_field_name("gb_used".to_string());
+
+let request = CreateBillableMetricRequest::new(metric);
+let created = client.create_billable_metric(request).await?;
+
+// List billable metrics
+let metrics = client.list_billable_metrics(None).await?;
+
+// Get specific billable metric
+let metric = client.get_billable_metric(
+    GetBillableMetricRequest::new("storage_gb".to_string())
+).await?;
+```
+
+### Customers
+
+```rust
+use lago_types::{
+    models::{CustomerType, CustomerPaymentProvider},
+    requests::customer::{CreateCustomerInput, CreateCustomerRequest},
+};
+
+// Create a customer
+let customer = CreateCustomerInput::new("customer_123".to_string())
+    .with_name("Acme Corp".to_string())
+    .with_email("billing@acme.com".to_string())
+    .with_customer_type(CustomerType::Company)
+    .with_currency("USD".to_string());
+
+let request = CreateCustomerRequest::new(customer);
+let created = client.create_customer(request).await?;
+
+// List customers
+let customers = client.list_customers(None).await?;
+
+// Get specific customer
+let customer = client.get_customer(
+    GetCustomerRequest::new("customer_123".to_string())
+).await?;
+
+// Update customer
+let updated = client.update_customer("customer_123", update_request).await?;
+```
+
 ## Error Handling
 
 The client uses the `lago-types` error system:
@@ -157,13 +216,18 @@ See the `examples/` directory for complete usage examples:
 
 - `basic_usage.rs` - Basic client usage
 - `custom_configuration.rs` - Advanced configuration options
+- `billable_metric.rs` - Billable metrics management
+- `customer.rs` - Customer management operations
 
 ```bash
 # Run the basic usage example
 cargo run --example basic_usage
 
-# Run the custom configuration example
-cargo run --example custom_configuration
+# Run the billable metrics example
+cargo run --example billable_metric
+
+# Run the customer management example
+cargo run --example customer
 ```
 
 ## Release
