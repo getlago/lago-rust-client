@@ -213,7 +213,7 @@ See the `examples/` directory for complete usage examples:
 - `basic_usage.rs` - Basic client usage
 - `custom_configuration.rs` - Advanced configuration options
 - `billable_metric.rs` - Billable metrics management
-- `customer.rs` - Customer management operations
+- `customer.rs` - Customers management operations
 
 ```bash
 # Run the basic usage example
