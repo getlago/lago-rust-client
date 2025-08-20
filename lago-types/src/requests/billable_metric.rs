@@ -53,7 +53,7 @@ impl ListBillableMetricsRequest {
         self
     }
 
-    /// Convers the request parameters into HTTP query parameters.
+    /// Converts the request parameters into HTTP query parameters.
     ///
     /// # Returns
     /// A vector of query parameter tuples containing both pagination and filter criteria.
