@@ -1,7 +1,11 @@
 use lago_types::{
     error::{LagoError, Result},
-    requests::billable_metric::{CreateBillableMetricRequest, GetBillableMetricRequest, ListBillableMetricsRequest},
-    responses::billable_metric::{CreateBillableMetricResponse, GetBillableMetricResponse, ListBillableMetricsResponse},
+    requests::billable_metric::{
+        CreateBillableMetricRequest, GetBillableMetricRequest, ListBillableMetricsRequest,
+    },
+    responses::billable_metric::{
+        CreateBillableMetricResponse, GetBillableMetricResponse, ListBillableMetricsResponse,
+    },
 };
 use url::Url;
 

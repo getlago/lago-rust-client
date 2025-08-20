@@ -1,12 +1,12 @@
 use lago_client::LagoClient;
 use lago_types::{
-    models::{CustomerType, CustomerFinalizeZeroAmountInvoice},
+    filters::customer::CustomerFilter,
+    models::{CustomerFinalizeZeroAmountInvoice, CustomerType},
     requests::customer::{
-        CreateCustomerInput, CreateCustomerRequest, CreateCustomerBillingConfiguration,
-        CreateCustomerShippingAddress, CreateCustomerMetadata, GetCustomerRequest,
+        CreateCustomerBillingConfiguration, CreateCustomerInput, CreateCustomerMetadata,
+        CreateCustomerRequest, CreateCustomerShippingAddress, GetCustomerRequest,
         ListCustomersRequest,
     },
-    filters::customer::CustomerFilter,
 };
 
 #[tokio::main]
@@ -27,7 +27,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .with_phone("+1-555-0123".to_string())
         .with_url("https://acme.com".to_string())
-        .with_legal_info("Acme Corporation Inc.".to_string(), Some("123456789".to_string()))
+        .with_legal_info(
+            "Acme Corporation Inc.".to_string(),
+            Some("123456789".to_string()),
+        )
         .with_currency("USD".to_string())
         .with_customer_type(CustomerType::Company)
         .with_finalize_zero_amount_invoice(CustomerFinalizeZeroAmountInvoice::Finalize)
@@ -65,7 +68,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let create_request = CreateCustomerRequest::new(new_customer);
     let created_customer = client.create_customer(create_request).await?;
-    println!("Created customer: {:?}", created_customer.customer.external_id);
+    println!(
+        "Created customer: {:?}",
+        created_customer.customer.external_id
+    );
 
     // Example 2: List all customers
     let list_request = ListCustomersRequest::new();
@@ -74,12 +80,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example 3: List customers with filters
     let filtered_request = ListCustomersRequest::new()
-        .with_filters(
-            CustomerFilter::new()
-                .with_customer_id("customer_123".to_string())
-        );
+        .with_filters(CustomerFilter::new().with_customer_id("customer_123".to_string()));
     let filtered_customers = client.list_customers(Some(filtered_request)).await?;
-    println!("Found {} filtered customers", filtered_customers.customers.len());
+    println!(
+        "Found {} filtered customers",
+        filtered_customers.customers.len()
+    );
 
     // Example 4: Get a specific customer by external ID
     let get_request = GetCustomerRequest::new("customer_123".to_string());
@@ -88,7 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example 5: Update an existing customer
     let updated_customer = CreateCustomerInput::new("customer_123".to_string())
-        .with_name("Acme Corporation Ltd.".to_string()) 
+        .with_name("Acme Corporation Ltd.".to_string())
         .with_email("accounts@acme.com".to_string())
         .with_phone("+1-555-0124".to_string());
 
