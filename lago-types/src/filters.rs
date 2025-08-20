@@ -1,3 +1,4 @@
+pub mod billable_metric;
 pub mod common;
 pub mod customer;
 pub mod date_range;
