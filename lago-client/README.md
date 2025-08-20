@@ -162,7 +162,7 @@ use lago_types::{
     requests::customer::{CreateCustomerInput, CreateCustomerRequest},
 };
 
-// Create a customer
+// Create or Update a customer
 let customer = CreateCustomerInput::new("customer_123".to_string())
     .with_name("Acme Corp".to_string())
     .with_email("billing@acme.com".to_string())
@@ -179,10 +179,6 @@ let customers = client.list_customers(None).await?;
 let customer = client.get_customer(
     GetCustomerRequest::new("customer_123".to_string())
 ).await?;
-
-// Update customer
-let updated = client.update_customer("customer_123", update_request).await?;
-```
 
 ## Error Handling
 
