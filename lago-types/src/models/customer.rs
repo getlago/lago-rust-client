@@ -125,10 +125,10 @@ pub struct CustomerIntegration {
     pub lago_id: Uuid,
     #[serde(alias = "type")]
     pub integration_type: CustomerIntegrationType,
-    pub integration_code: String,
-    pub external_customer_id: String,
+    pub integration_code: Option<String>,
+    pub external_customer_id: Option<String>,
     pub sync_with_provider: bool,
-    pub subsidiary_id: String,
+    pub subsidiary_id: Option<String>,
 }
 
 /// Supported integration types.
