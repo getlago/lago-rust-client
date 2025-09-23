@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::{Plan, PaginationMeta};
+use crate::models::{PaginationMeta, Plan};
 
 /// Response for listing plans.
 ///

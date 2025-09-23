@@ -2,9 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::models::{
-    ChargeModel, PlanInterval, RegroupPaidFeesType, PaginationParams,
-};
+use crate::models::{ChargeModel, PaginationParams, PlanInterval, RegroupPaidFeesType};
 
 /// Filter parameters for plan list operations.
 ///
@@ -464,7 +462,10 @@ impl CreateChargeInput {
     ///
     /// # Returns
     /// The modified input instance for method chaining.
-    pub fn with_group_properties(mut self, group_properties: Vec<CreateChargeGroupProperty>) -> Self {
+    pub fn with_group_properties(
+        mut self,
+        group_properties: Vec<CreateChargeGroupProperty>,
+    ) -> Self {
         self.group_properties = Some(group_properties);
         self
     }
