@@ -2,6 +2,27 @@
 
 A Rust client library for interacting with the [Lago](https://getlago.com) billing API.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Using Environment Variables](#using-environment-variables)
+  - [Programmatic Configuration](#programmatic-configuration)
+- [Configuration](#configuration)
+  - [Regions](#regions)
+  - [Retry Configuration](#retry-configuration)
+- [API Operations](#api-operations)
+  - [Invoices](#invoices)
+  - [Billable Metrics](#billable-metrics)
+  - [Customers](#customers)
+  - [Plans](#plans)
+- [Error Handling](#error-handling)
+- [Environment Variables](#environment-variables)
+- [Examples](#examples)
+- [Release](#release)
+- [License](#license)
+
 ## Features
 
 - **Async/Await Support**: Built with `tokio` and `reqwest` for modern async Rust
@@ -179,6 +200,104 @@ let customers = client.list_customers(None).await?;
 let customer = client.get_customer(
     GetCustomerRequest::new("customer_123".to_string())
 ).await?;
+```
+
+### Plans
+
+```rust
+use lago_types::{
+    models::{ChargeModel, PlanInterval},
+    requests::plan::{
+        CreateChargeInput, CreateChargeProperties, CreatePlanInput, 
+        CreatePlanRequest, CreateGraduatedRange, GetPlanRequest,
+        UpdatePlanInput, UpdatePlanRequest, DeletePlanRequest
+    },
+};
+
+// Create a simple plan with standard pricing
+let plan = CreatePlanInput::new(
+    "Premium API Plan".to_string(),
+    "premium_v1".to_string(),
+    PlanInterval::Monthly,
+    2999, // $29.99 in cents
+    "USD".to_string(),
+)
+.with_description("Premium API access".to_string())
+.with_trial_period(14.0);
+
+let request = CreatePlanRequest::new(plan);
+let created = client.create_plan(request).await?;
+
+// Create a plan with usage-based charges
+let charge_properties = CreateChargeProperties::Standard {
+    amount: "0.10".to_string(), // 10 cents per unit
+};
+
+let api_charge = CreateChargeInput::new(
+    billable_metric_id, // UUID of existing billable metric
+    ChargeModel::Standard,
+    charge_properties,
+)
+.with_invoice_display_name("API Calls".to_string())
+.with_invoiceable(true);
+
+let plan_with_charges = CreatePlanInput::new(
+    "Pay-per-use Plan".to_string(),
+    "payperuse_v1".to_string(),
+    PlanInterval::Monthly,
+    0, // No base fee
+    "USD".to_string(),
+)
+.with_charges(vec![api_charge]);
+
+// Create plan with graduated pricing
+let graduated_ranges = vec![
+    CreateGraduatedRange {
+        from_value: 0,
+        to_value: Some(100),
+        flat_amount: "0".to_string(),
+        per_unit_amount: "0.05".to_string(), // 5¢ for first 100
+    },
+    CreateGraduatedRange {
+        from_value: 101,
+        to_value: None,
+        flat_amount: "0".to_string(),
+        per_unit_amount: "0.03".to_string(), // 3¢ for 101+
+    },
+];
+
+let graduated_properties = CreateChargeProperties::Graduated {
+    graduated_ranges,
+};
+
+let graduated_charge = CreateChargeInput::new(
+    billable_metric_id,
+    ChargeModel::Graduated,
+    graduated_properties,
+);
+
+// List plans
+let plans = client.list_plans(None).await?;
+
+// Get specific plan
+let plan = client.get_plan(
+    GetPlanRequest::new("premium_v1".to_string())
+).await?;
+
+// Update a plan
+let update = UpdatePlanInput::new()
+    .with_name("Premium API Plan v2".to_string())
+    .with_description("Updated premium features".to_string());
+
+let updated = client.update_plan(
+    "premium_v1", 
+    UpdatePlanRequest::new(update)
+).await?;
+
+// Delete a plan
+let deleted = client.delete_plan(
+    DeletePlanRequest::new("old_plan_v1".to_string())
+).await?;
 
 ## Error Handling
 
@@ -214,6 +333,7 @@ See the `examples/` directory for complete usage examples:
 - `custom_configuration.rs` - Advanced configuration options
 - `billable_metric.rs` - Billable metrics management
 - `customer.rs` - Customers management operations
+- `plan.rs` - Plans management and advanced pricing models
 
 ```bash
 # Run the basic usage example
@@ -224,6 +344,9 @@ cargo run --example billable_metric
 
 # Run the customer management example
 cargo run --example customer
+
+# Run the plan management example
+cargo run --example plan
 ```
 
 ## Release
