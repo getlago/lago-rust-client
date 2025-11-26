@@ -14,7 +14,7 @@ pub struct ApiLogFilters {
     pub http_methods: Vec<HttpMethod>,
     pub http_statuses: Vec<HttpStatus>,
     pub api_version: Option<String>,
-    pub request_paths: Option<String>,
+    pub request_paths: Vec<String>,
 }
 
 impl ApiLogFilters {
@@ -102,12 +102,12 @@ impl ApiLogFilters {
     /// Sets the request paths filter.
     ///
     /// # Arguments
-    /// * `paths` - The request path to filter by
+    /// * `paths` - A vector of request paths to filter by
     ///
     /// # Returns
     /// The modified filter instance for method chaining.
-    pub fn with_request_paths(mut self, paths: String) -> Self {
-        self.request_paths = Some(paths);
+    pub fn with_request_paths(mut self, paths: Vec<String>) -> Self {
+        self.request_paths = paths;
         self
     }
 }
@@ -141,8 +141,8 @@ impl ListFilters for ApiLogFilters {
             params.push(("api_version", version.clone()));
         }
 
-        if let Some(paths) = &self.request_paths {
-            params.push(("request_paths", paths.clone()));
+        for path in &self.request_paths {
+            params.push(("request_paths[]", path.clone()));
         }
 
         params

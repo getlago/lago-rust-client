@@ -194,6 +194,7 @@ let request = ListApiLogsRequest::new().with_filters(
         .with_http_methods(vec![HttpMethod::Post, HttpMethod::Put])
         .with_http_statuses(vec![HttpStatus::Outcome(StatusOutcome::Failed)])
         .with_api_version("v1".to_string())
+        .with_request_paths(vec!["/invoices".to_string(), "/customers".to_string()])
         .with_date_range("2025-01-01".to_string(), "2025-01-31".to_string()),
 );
 let filtered_logs = client.list_api_logs(Some(request)).await?;

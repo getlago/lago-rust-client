@@ -75,8 +75,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Example 8: Filter API logs by request path
-    let path_filtered_request = ListApiLogsRequest::new()
-        .with_filters(ApiLogFilters::new().with_request_paths("/billable_metrics/".to_string()));
+    let path_filtered_request = ListApiLogsRequest::new().with_filters(
+        ApiLogFilters::new().with_request_paths(vec!["/billable_metrics/".to_string()]),
+    );
     let path_filtered_logs = client.list_api_logs(Some(path_filtered_request)).await?;
     println!(
         "Found {} API logs for /billable_metrics/ path",
