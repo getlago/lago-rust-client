@@ -1,3 +1,4 @@
+pub mod activity_log;
 pub mod api_log;
 pub mod billable_metric;
 pub mod customer;

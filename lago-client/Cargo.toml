@@ -43,5 +43,9 @@ name = "invoice"
 path = "examples/invoice.rs"
 
 [[example]]
+name = "activity_log"
+path = "examples/activity_log.rs"
+
+[[example]]
 name = "api_log"
 path = "examples/api_log.rs"
