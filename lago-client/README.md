@@ -176,6 +176,71 @@ let request = InvoicePreviewRequest::new(preview_input);
 let preview = client.preview_invoice(request).await?;
 ```
 
+### Activity Logs
+
+```rust
+use lago_types::{
+    filters::activity_log::ActivityLogFilters,
+    models::ActivitySource,
+    requests::activity_log::{GetActivityLogRequest, ListActivityLogsRequest},
+};
+
+// List all activity logs
+let activity_logs = client.list_activity_logs(None).await?;
+
+// List activity logs with filters
+let request = ListActivityLogsRequest::new().with_filters(
+    ActivityLogFilters::new()
+        .with_activity_types(vec!["invoice.created".to_string()])
+        .with_activity_sources(vec![ActivitySource::Api, ActivitySource::Front])
+        .with_user_emails(vec!["admin@example.com".to_string()])
+        .with_resource_types(vec!["Invoice".to_string()])
+        .with_date_range("2025-01-01".to_string(), "2025-01-31".to_string()),
+);
+let filtered_logs = client.list_activity_logs(Some(request)).await?;
+
+// Get a specific activity log by activity ID
+let request = GetActivityLogRequest::new("activity-id".to_string());
+let activity_log = client.get_activity_log(request).await?;
+println!("Activity: {} - {:?}",
+    activity_log.activity_log.activity_type,
+    activity_log.activity_log.activity_source
+);
+```
+
+### API Logs
+
+```rust
+use lago_types::{
+    filters::api_log::ApiLogFilters,
+    models::{HttpMethod, HttpStatus, StatusOutcome},
+    requests::api_log::{GetApiLogRequest, ListApiLogsRequest},
+};
+
+// List all API logs
+let api_logs = client.list_api_logs(None).await?;
+
+// List API logs with filters
+let request = ListApiLogsRequest::new().with_filters(
+    ApiLogFilters::new()
+        .with_http_methods(vec![HttpMethod::Post, HttpMethod::Put])
+        .with_http_statuses(vec![HttpStatus::Outcome(StatusOutcome::Failed)])
+        .with_api_version("v1".to_string())
+        .with_request_paths(vec!["/invoices".to_string(), "/customers".to_string()])
+        .with_date_range("2025-01-01".to_string(), "2025-01-31".to_string()),
+);
+let filtered_logs = client.list_api_logs(Some(request)).await?;
+
+// Get a specific API log by request ID
+let request = GetApiLogRequest::new("request-id".to_string());
+let api_log = client.get_api_log(request).await?;
+println!("Request: {:?} {} - Status {}",
+    api_log.api_log.http_method,
+    api_log.api_log.request_path,
+    api_log.api_log.http_status
+);
+```
+
 ### Billable Metrics
 
 ```rust
@@ -263,6 +328,8 @@ See the `examples/` directory for complete usage examples:
 
 - `basic_usage.rs` - Basic client usage
 - `custom_configuration.rs` - Advanced configuration options
+- `activity_log.rs` - Activity logs listing and filtering
+- `api_log.rs` - API logs listing and filtering
 - `billable_metric.rs` - Billable metrics management
 - `customer.rs` - Customers management operations
 - `invoice.rs` - Invoice operations including preview
@@ -270,6 +337,12 @@ See the `examples/` directory for complete usage examples:
 ```bash
 # Run the basic usage example
 cargo run --example basic_usage
+
+# Run the activity logs example
+cargo run --example activity_log
+
+# Run the API logs example
+cargo run --example api_log
 
 # Run the billable metrics example
 cargo run --example billable_metric
