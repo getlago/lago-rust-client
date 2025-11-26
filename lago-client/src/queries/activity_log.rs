@@ -51,7 +51,11 @@ impl LagoClient {
         request: GetActivityLogRequest,
     ) -> Result<GetActivityLogResponse> {
         let region = self.config.region()?;
-        let url = format!("{}/activity_logs/{}", region.endpoint(), request.activity_id);
+        let url = format!(
+            "{}/activity_logs/{}",
+            region.endpoint(),
+            request.activity_id
+        );
         self.make_request("GET", &url, None::<&()>).await
     }
 }
