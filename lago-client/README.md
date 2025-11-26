@@ -176,6 +176,38 @@ let request = InvoicePreviewRequest::new(preview_input);
 let preview = client.preview_invoice(request).await?;
 ```
 
+### API Logs
+
+```rust
+use lago_types::{
+    filters::api_log::ApiLogFilters,
+    models::{HttpMethod, HttpStatus, StatusOutcome},
+    requests::api_log::{GetApiLogRequest, ListApiLogsRequest},
+};
+
+// List all API logs
+let api_logs = client.list_api_logs(None).await?;
+
+// List API logs with filters
+let request = ListApiLogsRequest::new().with_filters(
+    ApiLogFilters::new()
+        .with_http_methods(vec![HttpMethod::Post, HttpMethod::Put])
+        .with_http_statuses(vec![HttpStatus::Outcome(StatusOutcome::Failed)])
+        .with_api_version("v1".to_string())
+        .with_date_range("2025-01-01".to_string(), "2025-01-31".to_string()),
+);
+let filtered_logs = client.list_api_logs(Some(request)).await?;
+
+// Get a specific API log by request ID
+let request = GetApiLogRequest::new("request-id".to_string());
+let api_log = client.get_api_log(request).await?;
+println!("Request: {:?} {} - Status {}",
+    api_log.api_log.http_method,
+    api_log.api_log.request_path,
+    api_log.api_log.http_status
+);
+```
+
 ### Billable Metrics
 
 ```rust
@@ -263,6 +295,7 @@ See the `examples/` directory for complete usage examples:
 
 - `basic_usage.rs` - Basic client usage
 - `custom_configuration.rs` - Advanced configuration options
+- `api_log.rs` - API logs listing and filtering
 - `billable_metric.rs` - Billable metrics management
 - `customer.rs` - Customers management operations
 - `invoice.rs` - Invoice operations including preview
@@ -270,6 +303,9 @@ See the `examples/` directory for complete usage examples:
 ```bash
 # Run the basic usage example
 cargo run --example basic_usage
+
+# Run the API logs example
+cargo run --example api_log
 
 # Run the billable metrics example
 cargo run --example billable_metric

@@ -8,7 +8,8 @@ license = "MIT"
 repository = "https://github.com/getlago/lago-rust-client"
 
 [dependencies]
-lago-types = "0.1.7"
+# lago-types = "0.1.7"
+lago-types = { path = "../lago-types" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
@@ -40,3 +41,7 @@ path = "examples/customer.rs"
 [[example]]
 name = "invoice"
 path = "examples/invoice.rs"
+
+[[example]]
+name = "api_log"
+path = "examples/api_log.rs"
