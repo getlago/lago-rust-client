@@ -6,7 +6,7 @@ A comprehensive type library for the Lago billing system, providing Rust data st
 
 This crate contains all the type definitions needed to interact with the Lago billing API, including:
 
-- **Models**: Core domain objects like `Customer`, `Invoice`, `ApiLogObject`, `UsageThreshold`
+- **Models**: Core domain objects like `Customer`, `Invoice`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`
 - **Requests**: Structured request types for API operations
 - **Responses**: Typed responses from API endpoints
 - **Filters**: Query parameter builders for list operations
@@ -126,6 +126,41 @@ let subscriptions = InvoicePreviewSubscriptions::new(vec!["sub_123".to_string()]
 let preview = InvoicePreviewInput::for_customer("customer_123".to_string())
     .with_subscriptions(subscriptions);
 
+
+### Activity Logs
+
+Fetch activity logs:
+
+```rust
+use std::str::FromStr;
+use lago_types::{
+    models::{ActivitySource, PaginationParams},
+    requests::activity_log::{ListActivityLogsRequest, GetActivityLogRequest},
+    filters::activity_log::ActivityLogFilters,
+};
+
+// Parse activity source from string
+let source = ActivitySource::from_str("api").unwrap();
+
+// Create a request to list activity logs with filters
+let request = ListActivityLogsRequest::new()
+    .with_pagination(
+        PaginationParams::new()
+            .with_page(1)
+            .with_per_page(50)
+    )
+    .with_filters(
+        ActivityLogFilters::new()
+            .with_activity_types(vec!["invoice.created".to_string()])
+            .with_activity_sources(vec![ActivitySource::Api, ActivitySource::Front])
+            .with_user_emails(vec!["admin@example.com".to_string()])
+            .with_resource_types(vec!["Invoice".to_string()])
+            .with_date_range("2025-01-01".to_string(), "2025-01-31".to_string())
+    );
+
+// Get a specific activity log by activity ID
+let get_request = GetActivityLogRequest::new("activity-uuid".to_string());
+```
 
 ### API Logs
 
