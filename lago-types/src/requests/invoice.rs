@@ -432,7 +432,7 @@ impl InvoicePreviewRequest {
     /// * `input` - The invoice preview input data
     ///
     /// # Returns
-    /// A new `PreviewInvoiceRequest` instance
+    /// A new `InvoicePreviewRequest` instance
     pub fn new(input: InvoicePreviewInput) -> Self {
         Self { input }
     }

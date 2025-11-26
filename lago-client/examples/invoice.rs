@@ -71,12 +71,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Example 6: Preview an invoice for existing subscriptions with plan upgrade
-    let subscriptions =
-        InvoicePreviewSubscriptions::new(vec!["sub_123".to_string()])
-            .with_plan_code("in_advance".to_string());
+    let subscriptions = InvoicePreviewSubscriptions::new(vec!["sub_123".to_string()])
+        .with_plan_code("in_advance".to_string());
 
-    let preview_input = InvoicePreviewInput::for_customer("cust_123".to_string())
-        .with_subscriptions(subscriptions);
+    let preview_input =
+        InvoicePreviewInput::for_customer("cust_123".to_string()).with_subscriptions(subscriptions);
 
     let preview_request = InvoicePreviewRequest::new(preview_input);
     let preview = client.preview_invoice(preview_request).await?;
