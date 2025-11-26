@@ -85,6 +85,48 @@ let request = ListInvoicesRequest::new()
 let params = request.to_query_params();
 ```
 
+### Invoice Preview
+
+Preview an invoice before creating it:
+
+```rust
+use lago_types::requests::invoice::{
+    BillingTime, InvoicePreviewInput, InvoicePreviewRequest,
+    InvoicePreviewCustomer, InvoicePreviewCoupon, InvoicePreviewSubscriptions,
+};
+
+// Preview for an existing customer with a new subscription
+let preview = InvoicePreviewInput::for_customer("customer_123".to_string())
+    .with_plan_code("startup".to_string())
+    .with_billing_time(BillingTime::Calendar);
+
+let request = InvoicePreviewRequest::new(preview);
+
+// Preview with inline customer details
+let customer = InvoicePreviewCustomer::new()
+    .with_name("New Customer".to_string())
+    .with_currency("USD".to_string());
+
+let preview = InvoicePreviewInput::new(customer)
+    .with_plan_code("enterprise".to_string())
+    .with_subscription_at("2024-01-01T00:00:00Z".to_string());
+
+// Preview with coupons
+let coupon = InvoicePreviewCoupon::new("DISCOUNT20".to_string())
+    .with_percentage("20".to_string());
+
+let preview = InvoicePreviewInput::for_customer("customer_123".to_string())
+    .with_plan_code("startup".to_string())
+    .with_coupons(vec![coupon]);
+
+// Preview for existing subscriptions with plan upgrade
+let subscriptions = InvoicePreviewSubscriptions::new(vec!["sub_123".to_string()])
+    .with_plan_code("enterprise".to_string());
+
+let preview = InvoicePreviewInput::for_customer("customer_123".to_string())
+    .with_subscriptions(subscriptions);
+```
+
 ## Module Structure
 
 - `models/` - Core domain models and data structures

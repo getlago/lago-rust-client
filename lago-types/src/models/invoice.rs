@@ -12,7 +12,7 @@ use super::usage_threshold::UsageThreshold;
 /// payment status, billing periods, and associated metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Invoice {
-    pub lago_id: Uuid,
+    pub lago_id: Option<Uuid>,
     pub billing_entity_code: Option<String>,
     pub sequential_id: Option<i32>,
     pub number: String,
@@ -41,7 +41,7 @@ pub struct Invoice {
     pub file_url: Option<String>,
     pub customer: Option<Customer>,
     pub billing_periods: Option<Vec<InvoiceBillingPeriod>>,
-    pub metadata: Vec<InvoiceMetadata>,
+    pub metadata: Option<Vec<InvoiceMetadata>>,
     pub applied_taxes: Vec<InvoiceAppliedTax>,
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
 }

@@ -1,7 +1,7 @@
 use lago_types::{
     error::{LagoError, Result},
-    requests::invoice::{GetInvoiceRequest, ListInvoicesRequest},
-    responses::invoice::{GetInvoiceResponse, ListInvoicesResponse},
+    requests::invoice::{GetInvoiceRequest, InvoicePreviewRequest, ListInvoicesRequest},
+    responses::invoice::{GetInvoiceResponse, InvoicePreviewResponse, ListInvoicesResponse},
 };
 use url::Url;
 
@@ -50,5 +50,24 @@ impl LagoClient {
         let region = self.config.region()?;
         let url = format!("{}/invoices/{}", region.endpoint(), request.invoice_id);
         self.make_request("GET", &url, None::<&()>).await
+    }
+
+    /// Previews an invoice without creating it
+    ///
+    /// This endpoint allows you to retrieve an estimated invoice before finalization.
+    /// It can be used to preview invoices for new subscriptions or existing customers.
+    ///
+    /// # Arguments
+    /// * `request` - The invoice preview request containing customer and subscription details
+    ///
+    /// # Returns
+    /// A `Result` containing the previewed invoice or an error
+    pub async fn preview_invoice(
+        &self,
+        request: InvoicePreviewRequest,
+    ) -> Result<InvoicePreviewResponse> {
+        let region = self.config.region()?;
+        let url = format!("{}/invoices/preview", region.endpoint());
+        self.make_request("POST", &url, Some(&request)).await
     }
 }

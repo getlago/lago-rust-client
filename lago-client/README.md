@@ -115,14 +115,65 @@ Retry modes:
 use lago_types::requests::invoice::{ListInvoicesRequest, GetInvoiceRequest};
 
 // List invoices with optional filters
-let request = ListInvoicesRequest::builder()
-    .limit(10)
-    .build();
+let request = ListInvoicesRequest::new();
 let invoices = client.list_invoices(Some(request)).await?;
 
 // Get a specific invoice
-let request = GetInvoiceRequest::new("invoice-id");
+let request = GetInvoiceRequest::new("invoice-id".to_string());
 let invoice = client.get_invoice(request).await?;
+```
+
+### Invoice Preview
+
+Preview an invoice before creating it:
+
+```rust
+use lago_types::requests::invoice::{
+    BillingTime, InvoicePreviewInput, InvoicePreviewRequest,
+    InvoicePreviewCustomer, InvoicePreviewCoupon, InvoicePreviewSubscriptions,
+};
+
+// Preview for an existing customer with a new subscription
+let preview_input = InvoicePreviewInput::for_customer("customer_123".to_string())
+    .with_plan_code("startup".to_string())
+    .with_billing_time(BillingTime::Calendar);
+
+let request = InvoicePreviewRequest::new(preview_input);
+let preview = client.preview_invoice(request).await?;
+println!("Preview total: {} cents", preview.invoice.total_amount_cents);
+
+// Preview with inline customer details
+let customer = InvoicePreviewCustomer::new()
+    .with_name("New Customer".to_string())
+    .with_currency("USD".to_string());
+
+let preview_input = InvoicePreviewInput::new(customer)
+    .with_plan_code("enterprise".to_string())
+    .with_subscription_at("2024-01-01T00:00:00Z".to_string());
+
+let request = InvoicePreviewRequest::new(preview_input);
+let preview = client.preview_invoice(request).await?;
+
+// Preview with coupons
+let coupon = InvoicePreviewCoupon::new("DISCOUNT20".to_string())
+    .with_percentage("20".to_string());
+
+let preview_input = InvoicePreviewInput::for_customer("customer_123".to_string())
+    .with_plan_code("startup".to_string())
+    .with_coupons(vec![coupon]);
+
+let request = InvoicePreviewRequest::new(preview_input);
+let preview = client.preview_invoice(request).await?;
+
+// Preview for existing subscriptions with plan upgrade
+let subscriptions = InvoicePreviewSubscriptions::new(vec!["sub_123".to_string()])
+    .with_plan_code("enterprise".to_string());
+
+let preview_input = InvoicePreviewInput::for_customer("customer_123".to_string())
+    .with_subscriptions(subscriptions);
+
+let request = InvoicePreviewRequest::new(preview_input);
+let preview = client.preview_invoice(request).await?;
 ```
 
 ### Billable Metrics
@@ -214,6 +265,7 @@ See the `examples/` directory for complete usage examples:
 - `custom_configuration.rs` - Advanced configuration options
 - `billable_metric.rs` - Billable metrics management
 - `customer.rs` - Customers management operations
+- `invoice.rs` - Invoice operations including preview
 
 ```bash
 # Run the basic usage example
@@ -224,6 +276,9 @@ cargo run --example billable_metric
 
 # Run the customer management example
 cargo run --example customer
+
+# Run the invoice example
+cargo run --example invoice
 ```
 
 ## Release

@@ -19,3 +19,12 @@ pub struct ListInvoicesResponse {
 pub struct GetInvoiceResponse {
     pub invoice: Invoice,
 }
+
+/// Response containing a previewed invoice.
+///
+/// This struct represents the API response for the invoice preview endpoint.
+/// The response contains the same Invoice structure as other invoice endpoints.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InvoicePreviewResponse {
+    pub invoice: Invoice,
+}

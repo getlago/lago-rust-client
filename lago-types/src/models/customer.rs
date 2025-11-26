@@ -10,10 +10,10 @@ use uuid::Uuid;
 /// associated metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Customer {
-    pub lago_id: Uuid,
-    pub sequential_id: i32,
-    pub slug: String,
-    pub external_id: String,
+    pub lago_id: Option<Uuid>,
+    pub sequential_id: Option<i32>,
+    pub slug: Option<String>,
+    pub external_id: Option<String>,
     pub applicable_timezone: String,
     pub created_at: DateTime<Utc>,
     pub billing_entity_code: String,
