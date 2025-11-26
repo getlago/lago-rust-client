@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Example 4: Get a specific customer by external ID
     let get_request = GetCustomerRequest::new("customer_123".to_string());
     let customer = client.get_customer(get_request).await?;
-    println!("Retrieved customer: {}", customer.customer.external_id);
+    println!("Retrieved customer: {:?}", customer.customer.external_id);
 
     // Example 5: Update an existing customer
     let updated_customer = CreateCustomerInput::new("customer_123".to_string())
@@ -100,7 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let update_request = CreateCustomerRequest::new(updated_customer);
     let updated = client.create_customer(update_request).await?;
-    println!("Updated customer: {}", updated.customer.external_id);
+    println!("Updated customer: {:?}", updated.customer.external_id);
 
     Ok(())
 }
