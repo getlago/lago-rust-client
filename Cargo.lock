@@ -627,7 +627,7 @@ dependencies = [
 
 [[package]]
 name = "lago-client"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anyhow",
  "lago-types",
@@ -643,7 +643,7 @@ dependencies = [
 
 [[package]]
 name = "lago-types"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "chrono",
  "reqwest",

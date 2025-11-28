@@ -339,6 +339,67 @@ let request = ListAppliedCouponsRequest::new()
             .with_coupon_codes(vec!["WELCOME10".to_string()])
     );
 let filtered = client.list_applied_coupons(Some(request)).await?;
+```
+
+### Coupons
+
+```rust
+use lago_types::{
+    models::{CouponExpiration, CouponFrequency, PaginationParams},
+    requests::coupon::{
+        CreateCouponInput, CreateCouponRequest, DeleteCouponRequest,
+        GetCouponRequest, ListCouponsRequest, UpdateCouponInput, UpdateCouponRequest,
+    },
+};
+
+// Create a percentage-based coupon
+let coupon = CreateCouponInput::percentage(
+    "Welcome 10% Discount".to_string(),
+    "WELCOME10".to_string(),
+    "10".to_string(),
+    CouponFrequency::Once,
+    CouponExpiration::NoExpiration,
+)
+.with_reusable(true);
+let request = CreateCouponRequest::new(coupon);
+let created = client.create_coupon(request).await?;
+
+// Create a fixed amount coupon
+let coupon = CreateCouponInput::fixed_amount(
+    "Summer $50 Off".to_string(),
+    "SUMMER50".to_string(),
+    5000, // $50.00 in cents
+    "USD".to_string(),
+    CouponFrequency::Recurring,
+    CouponExpiration::NoExpiration,
+)
+.with_frequency_duration(3);
+let request = CreateCouponRequest::new(coupon);
+let created = client.create_coupon(request).await?;
+
+// List all coupons
+let coupons = client.list_coupons(None).await?;
+
+// List coupons with pagination
+let request = ListCouponsRequest::new()
+    .with_pagination(PaginationParams::default().with_per_page(20));
+let coupons = client.list_coupons(Some(request)).await?;
+
+// Get a specific coupon
+let request = GetCouponRequest::new("WELCOME10".to_string());
+let coupon = client.get_coupon(request).await?;
+
+// Update a coupon
+let update_input = UpdateCouponInput::new()
+    .with_name("Welcome 15% Discount".to_string())
+    .with_percentage_rate("15".to_string());
+let request = UpdateCouponRequest::new("WELCOME10".to_string(), update_input);
+let updated = client.update_coupon(request).await?;
+
+// Delete a coupon
+let request = DeleteCouponRequest::new("SUMMER50".to_string());
+let deleted = client.delete_coupon(request).await?;
+```
 
 ## Error Handling
 
@@ -378,6 +439,7 @@ See the `examples/` directory for complete usage examples:
 - `customer.rs` - Customers management operations
 - `invoice.rs` - Invoice operations including preview
 - `applied_coupon.rs` - Applied coupons listing and filtering
+- `coupon.rs` - Coupon CRUD operations
 
 ```bash
 # Run the basic usage example
@@ -400,6 +462,9 @@ cargo run --example invoice
 
 # Run the applied coupons example
 cargo run --example applied_coupon
+
+# Run the coupons example
+cargo run --example coupon
 ```
 
 ## Release

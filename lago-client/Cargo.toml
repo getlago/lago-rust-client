@@ -1,6 +1,6 @@
 [package]
 name = "lago-client"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Lago API client"
@@ -52,3 +52,7 @@ path = "examples/api_log.rs"
 [[example]]
 name = "applied_coupon"
 path = "examples/applied_coupon.rs"
+
+[[example]]
+name = "coupon"
+path = "examples/coupon.rs"
