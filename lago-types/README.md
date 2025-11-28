@@ -6,7 +6,7 @@ A comprehensive type library for the Lago billing system, providing Rust data st
 
 This crate contains all the type definitions needed to interact with the Lago billing API, including:
 
-- **Models**: Core domain objects like `Customer`, `Invoice`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`
+- **Models**: Core domain objects like `Customer`, `Invoice`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`
 - **Requests**: Structured request types for API operations
 - **Responses**: Typed responses from API endpoints
 - **Filters**: Query parameter builders for list operations
@@ -197,6 +197,114 @@ let request = ListApiLogsRequest::new()
 
 // Get a specific API log by request ID
 let get_request = GetApiLogRequest::new("request-uuid".to_string());
+```
+
+### Applied Coupons
+
+Work with applied coupons:
+
+```rust
+use lago_types::{
+    filters::applied_coupon::AppliedCouponFilter,
+    models::{AppliedCouponStatus, AppliedCouponFrequency, PaginationParams},
+    requests::applied_coupon::{ApplyCouponInput, ApplyCouponRequest, ListAppliedCouponsRequest},
+};
+
+// Create input to apply a coupon to a customer
+let apply_input = ApplyCouponInput::new(
+    "customer_123".to_string(),
+    "WELCOME10".to_string()
+);
+
+// Apply with a fixed amount discount
+let apply_input = ApplyCouponInput::new("customer_123".to_string(), "DISCOUNT50".to_string())
+    .with_fixed_amount(5000, "USD".to_string())
+    .with_frequency(AppliedCouponFrequency::Once);
+
+// Apply with a percentage discount
+let apply_input = ApplyCouponInput::new("customer_123".to_string(), "SAVE20".to_string())
+    .with_percentage_rate("20".to_string())
+    .with_frequency(AppliedCouponFrequency::Recurring)
+    .with_frequency_duration(3); // Apply for 3 billing periods
+
+let request = ApplyCouponRequest::new(apply_input);
+
+// Create a request to list applied coupons with filters
+let list_request = ListAppliedCouponsRequest::new()
+    .with_pagination(
+        PaginationParams::new()
+            .with_page(1)
+            .with_per_page(50)
+    )
+    .with_filters(
+        AppliedCouponFilter::new()
+            .with_status(AppliedCouponStatus::Active)
+            .with_external_customer_id("customer_123".to_string())
+            .with_coupon_codes(vec!["WELCOME10".to_string(), "SAVE20".to_string()])
+    );
+
+// Convert to query parameters
+let params = list_request.to_query_params();
+```
+
+### Coupons
+
+Work with coupon definitions:
+
+```rust
+use lago_types::{
+    models::{CouponExpiration, CouponFrequency, PaginationParams},
+    requests::coupon::{
+        CreateCouponInput, CreateCouponRequest, DeleteCouponRequest,
+        GetCouponRequest, ListCouponsRequest, UpdateCouponInput, UpdateCouponRequest,
+    },
+};
+
+// Create a percentage-based coupon
+let coupon = CreateCouponInput::percentage(
+    "Welcome 10% Discount".to_string(),
+    "WELCOME10".to_string(),
+    "10".to_string(),
+    CouponFrequency::Once,
+    CouponExpiration::NoExpiration,
+)
+.with_reusable(true);
+let request = CreateCouponRequest::new(coupon);
+
+// Create a fixed amount coupon with recurring application
+let coupon = CreateCouponInput::fixed_amount(
+    "Summer $50 Off".to_string(),
+    "SUMMER50".to_string(),
+    5000, // $50.00 in cents
+    "USD".to_string(),
+    CouponFrequency::Recurring,
+    CouponExpiration::NoExpiration,
+)
+.with_frequency_duration(3) // Apply for 3 billing periods
+.with_limited_plans(vec!["startup".to_string(), "professional".to_string()]);
+let request = CreateCouponRequest::new(coupon);
+
+// List coupons with pagination
+let list_request = ListCouponsRequest::new()
+    .with_pagination(
+        PaginationParams::new()
+            .with_page(1)
+            .with_per_page(20)
+    );
+let params = list_request.to_query_params();
+
+// Get a specific coupon
+let get_request = GetCouponRequest::new("WELCOME10".to_string());
+
+// Update an existing coupon
+let update_input = UpdateCouponInput::new()
+    .with_name("Welcome 15% Discount".to_string())
+    .with_percentage_rate("15".to_string())
+    .with_reusable(false);
+let update_request = UpdateCouponRequest::new("WELCOME10".to_string(), update_input);
+
+// Delete a coupon
+let delete_request = DeleteCouponRequest::new("SUMMER50".to_string());
 ```
 
 ## Module Structure

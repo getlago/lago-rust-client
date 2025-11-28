@@ -295,6 +295,111 @@ let customers = client.list_customers(None).await?;
 let customer = client.get_customer(
     GetCustomerRequest::new("customer_123".to_string())
 ).await?;
+```
+
+### Applied Coupons
+
+```rust
+use lago_types::{
+    filters::applied_coupon::AppliedCouponFilter,
+    models::{AppliedCouponStatus, PaginationParams},
+    requests::applied_coupon::{ApplyCouponInput, ApplyCouponRequest, ListAppliedCouponsRequest},
+};
+
+// Apply a coupon to a customer
+let apply_input = ApplyCouponInput::new(
+    "customer_123".to_string(),
+    "WELCOME10".to_string()
+);
+let request = ApplyCouponRequest::new(apply_input);
+let applied = client.apply_coupon(request).await?;
+
+// Apply with a fixed amount discount
+let apply_input = ApplyCouponInput::new("customer_123".to_string(), "DISCOUNT50".to_string())
+    .with_fixed_amount(5000, "USD".to_string()); // $50.00 discount
+let request = ApplyCouponRequest::new(apply_input);
+let applied = client.apply_coupon(request).await?;
+
+// Apply with a percentage discount
+let apply_input = ApplyCouponInput::new("customer_123".to_string(), "SAVE20".to_string())
+    .with_percentage_rate("20".to_string()); // 20% discount
+let request = ApplyCouponRequest::new(apply_input);
+let applied = client.apply_coupon(request).await?;
+
+// List all applied coupons
+let applied_coupons = client.list_applied_coupons(None).await?;
+
+// List with filters
+let request = ListAppliedCouponsRequest::new()
+    .with_pagination(PaginationParams::default().with_page(1).with_per_page(20))
+    .with_filters(
+        AppliedCouponFilter::new()
+            .with_status(AppliedCouponStatus::Active)
+            .with_external_customer_id("customer_123".to_string())
+            .with_coupon_codes(vec!["WELCOME10".to_string()])
+    );
+let filtered = client.list_applied_coupons(Some(request)).await?;
+```
+
+### Coupons
+
+```rust
+use lago_types::{
+    models::{CouponExpiration, CouponFrequency, PaginationParams},
+    requests::coupon::{
+        CreateCouponInput, CreateCouponRequest, DeleteCouponRequest,
+        GetCouponRequest, ListCouponsRequest, UpdateCouponInput, UpdateCouponRequest,
+    },
+};
+
+// Create a percentage-based coupon
+let coupon = CreateCouponInput::percentage(
+    "Welcome 10% Discount".to_string(),
+    "WELCOME10".to_string(),
+    "10".to_string(),
+    CouponFrequency::Once,
+    CouponExpiration::NoExpiration,
+)
+.with_reusable(true);
+let request = CreateCouponRequest::new(coupon);
+let created = client.create_coupon(request).await?;
+
+// Create a fixed amount coupon
+let coupon = CreateCouponInput::fixed_amount(
+    "Summer $50 Off".to_string(),
+    "SUMMER50".to_string(),
+    5000, // $50.00 in cents
+    "USD".to_string(),
+    CouponFrequency::Recurring,
+    CouponExpiration::NoExpiration,
+)
+.with_frequency_duration(3);
+let request = CreateCouponRequest::new(coupon);
+let created = client.create_coupon(request).await?;
+
+// List all coupons
+let coupons = client.list_coupons(None).await?;
+
+// List coupons with pagination
+let request = ListCouponsRequest::new()
+    .with_pagination(PaginationParams::default().with_per_page(20));
+let coupons = client.list_coupons(Some(request)).await?;
+
+// Get a specific coupon
+let request = GetCouponRequest::new("WELCOME10".to_string());
+let coupon = client.get_coupon(request).await?;
+
+// Update a coupon
+let update_input = UpdateCouponInput::new()
+    .with_name("Welcome 15% Discount".to_string())
+    .with_percentage_rate("15".to_string());
+let request = UpdateCouponRequest::new("WELCOME10".to_string(), update_input);
+let updated = client.update_coupon(request).await?;
+
+// Delete a coupon
+let request = DeleteCouponRequest::new("SUMMER50".to_string());
+let deleted = client.delete_coupon(request).await?;
+```
 
 ## Error Handling
 
@@ -333,6 +438,8 @@ See the `examples/` directory for complete usage examples:
 - `billable_metric.rs` - Billable metrics management
 - `customer.rs` - Customers management operations
 - `invoice.rs` - Invoice operations including preview
+- `applied_coupon.rs` - Applied coupons listing and filtering
+- `coupon.rs` - Coupon CRUD operations
 
 ```bash
 # Run the basic usage example
@@ -352,6 +459,12 @@ cargo run --example customer
 
 # Run the invoice example
 cargo run --example invoice
+
+# Run the applied coupons example
+cargo run --example applied_coupon
+
+# Run the coupons example
+cargo run --example coupon
 ```
 
 ## Release
