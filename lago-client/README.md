@@ -295,6 +295,50 @@ let customers = client.list_customers(None).await?;
 let customer = client.get_customer(
     GetCustomerRequest::new("customer_123".to_string())
 ).await?;
+```
+
+### Applied Coupons
+
+```rust
+use lago_types::{
+    filters::applied_coupon::AppliedCouponFilter,
+    models::{AppliedCouponStatus, PaginationParams},
+    requests::applied_coupon::{ApplyCouponInput, ApplyCouponRequest, ListAppliedCouponsRequest},
+};
+
+// Apply a coupon to a customer
+let apply_input = ApplyCouponInput::new(
+    "customer_123".to_string(),
+    "WELCOME10".to_string()
+);
+let request = ApplyCouponRequest::new(apply_input);
+let applied = client.apply_coupon(request).await?;
+
+// Apply with a fixed amount discount
+let apply_input = ApplyCouponInput::new("customer_123".to_string(), "DISCOUNT50".to_string())
+    .with_fixed_amount(5000, "USD".to_string()); // $50.00 discount
+let request = ApplyCouponRequest::new(apply_input);
+let applied = client.apply_coupon(request).await?;
+
+// Apply with a percentage discount
+let apply_input = ApplyCouponInput::new("customer_123".to_string(), "SAVE20".to_string())
+    .with_percentage_rate("20".to_string()); // 20% discount
+let request = ApplyCouponRequest::new(apply_input);
+let applied = client.apply_coupon(request).await?;
+
+// List all applied coupons
+let applied_coupons = client.list_applied_coupons(None).await?;
+
+// List with filters
+let request = ListAppliedCouponsRequest::new()
+    .with_pagination(PaginationParams::default().with_page(1).with_per_page(20))
+    .with_filters(
+        AppliedCouponFilter::new()
+            .with_status(AppliedCouponStatus::Active)
+            .with_external_customer_id("customer_123".to_string())
+            .with_coupon_codes(vec!["WELCOME10".to_string()])
+    );
+let filtered = client.list_applied_coupons(Some(request)).await?;
 
 ## Error Handling
 
@@ -333,6 +377,7 @@ See the `examples/` directory for complete usage examples:
 - `billable_metric.rs` - Billable metrics management
 - `customer.rs` - Customers management operations
 - `invoice.rs` - Invoice operations including preview
+- `applied_coupon.rs` - Applied coupons listing and filtering
 
 ```bash
 # Run the basic usage example
@@ -352,6 +397,9 @@ cargo run --example customer
 
 # Run the invoice example
 cargo run --example invoice
+
+# Run the applied coupons example
+cargo run --example applied_coupon
 ```
 
 ## Release
