@@ -93,7 +93,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let list_request = ListSubscriptionsRequest::new()
             .with_pagination(PaginationParams::new().with_per_page(1));
         match client.list_subscriptions(Some(list_request)).await {
-            Ok(response) => response.subscriptions.first().map(|s| s.external_id.clone()),
+            Ok(response) => response
+                .subscriptions
+                .first()
+                .map(|s| s.external_id.clone()),
             Err(_) => None,
         }
     };
@@ -106,10 +109,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("Retrieved subscription:");
                 println!("  External ID: {}", response.subscription.external_id);
                 println!("  Status: {:?}", response.subscription.status);
-                println!(
-                    "  Customer: {}",
-                    response.subscription.external_customer_id
-                );
+                println!("  Customer: {}", response.subscription.external_customer_id);
                 if let Some(name) = &response.subscription.name {
                     println!("  Name: {}", name);
                 }
