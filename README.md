@@ -153,6 +153,39 @@ let request = GetInvoiceRequest::new("invoice-id".to_string());
 let invoice = client.get_invoice(request).await?;
 ```
 
+### Customer Usage
+
+```rust
+use lago_types::requests::customer_usage::GetCustomerCurrentUsageRequest;
+
+// Get customer current usage for a subscription
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+);
+let usage = client.get_customer_current_usage(request).await?;
+
+println!("Usage period: {} to {}", usage.customer_usage.from_datetime, usage.customer_usage.to_datetime);
+println!("Total amount: {} cents", usage.customer_usage.total_amount_cents);
+
+// Iterate through charges
+for charge in &usage.customer_usage.charges_usage {
+    println!("{}: {} units, {} cents",
+        charge.billable_metric.name,
+        charge.units,
+        charge.amount_cents
+    );
+}
+
+// Get usage without applying taxes
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+)
+.with_apply_taxes(false);
+let usage = client.get_customer_current_usage(request).await?;
+```
+
 ## Error Handling
 
 The client provides comprehensive error handling:
