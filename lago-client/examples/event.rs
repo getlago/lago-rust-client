@@ -21,10 +21,7 @@ async fn create_or_get_event(
         }
         Err(LagoError::Api { status: 422, .. }) => {
             // Event already exists, fetch it instead
-            println!(
-                "Event {} already exists, fetching it...",
-                transaction_id
-            );
+            println!("Event {} already exists, fetching it...", transaction_id);
             let get_request = GetEventRequest::new(transaction_id.clone());
             let event = client.get_event(get_request).await?;
             println!(

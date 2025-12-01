@@ -31,8 +31,7 @@ impl LagoClient {
     pub async fn get_event(&self, request: GetEventRequest) -> Result<GetEventResponse> {
         let region = self.config.region()?;
         // URL encode the transaction_id to handle special characters
-        let encoded_transaction_id =
-            urlencoding::encode(&request.transaction_id).into_owned();
+        let encoded_transaction_id = urlencoding::encode(&request.transaction_id).into_owned();
         let url = format!("{}/events/{}", region.endpoint(), encoded_transaction_id);
 
         self.make_request("GET", &url, None::<&()>).await

@@ -34,7 +34,7 @@ pub struct CreateEventInput {
     pub external_subscription_id: Option<String>,
     /// Billable metric code
     pub code: String,
-    /// Event timestamp (Unix timestamp or ISO 8601 string)
+    /// Event timestamp (Unix timestamp in seconds)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<i64>,
     /// Custom properties/metadata for the event
@@ -55,7 +55,11 @@ impl CreateEventInput {
     ///
     /// # Returns
     /// A new `CreateEventInput` instance
-    pub fn for_customer(transaction_id: String, external_customer_id: String, code: String) -> Self {
+    pub fn for_customer(
+        transaction_id: String,
+        external_customer_id: String,
+        code: String,
+    ) -> Self {
         Self {
             transaction_id,
             external_customer_id: Some(external_customer_id),
