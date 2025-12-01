@@ -61,3 +61,7 @@ path = "examples/coupon.rs"
 [[example]]
 name = "event"
 path = "examples/event.rs"
+
+[[example]]
+name = "credit_note"
+path = "examples/credit_note.rs"
