@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/getlago/lago-rust-client"
 
 [dependencies]
-lago-types = "0.1.10"
+lago-types = { path = "../lago-types" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
@@ -16,6 +16,7 @@ reqwest = { workspace = true }
 thiserror = { workspace = true }
 anyhow = { workspace = true }
 url = { workspace = true }
+urlencoding = { workspace = true }
 
 [dev-dependencies]
 mockito = "1.4"
@@ -56,3 +57,7 @@ path = "examples/applied_coupon.rs"
 [[example]]
 name = "coupon"
 path = "examples/coupon.rs"
+
+[[example]]
+name = "event"
+path = "examples/event.rs"

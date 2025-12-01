@@ -6,7 +6,7 @@ A comprehensive type library for the Lago billing system, providing Rust data st
 
 This crate contains all the type definitions needed to interact with the Lago billing API, including:
 
-- **Models**: Core domain objects like `Customer`, `Invoice`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`
+- **Models**: Core domain objects like `Customer`, `Invoice`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `Event`, `UsageThreshold`
 - **Requests**: Structured request types for API operations
 - **Responses**: Typed responses from API endpoints
 - **Filters**: Query parameter builders for list operations
@@ -305,6 +305,40 @@ let update_request = UpdateCouponRequest::new("WELCOME10".to_string(), update_in
 
 // Delete a coupon
 let delete_request = DeleteCouponRequest::new("SUMMER50".to_string());
+```
+
+### Events
+
+Send and retrieve usage events:
+
+```rust
+use lago_types::requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest};
+use serde_json::json;
+
+// Create a usage event for a customer
+let event = CreateEventInput::for_customer(
+    "transaction_123".to_string(),
+    "customer_456".to_string(),
+    "api_calls".to_string(),
+)
+.with_properties(json!({"calls": 150}))
+.with_timestamp(1705312200);
+
+let request = CreateEventRequest::new(event);
+
+// Create a usage event for a subscription
+let event = CreateEventInput::for_subscription(
+    "transaction_456".to_string(),
+    "subscription_789".to_string(),
+    "storage_gb".to_string(),
+)
+.with_properties(json!({"gb": 50.5}))
+.with_precise_total_amount_cents(1234567);
+
+let request = CreateEventRequest::new(event);
+
+// Get a specific event by transaction ID
+let get_request = GetEventRequest::new("transaction_123".to_string());
 ```
 
 ## Module Structure

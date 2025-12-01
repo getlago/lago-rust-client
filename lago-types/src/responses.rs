@@ -4,4 +4,5 @@ pub mod applied_coupon;
 pub mod billable_metric;
 pub mod coupon;
 pub mod customer;
+pub mod event;
 pub mod invoice;
