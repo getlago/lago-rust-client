@@ -8,3 +8,4 @@ pub mod credit_note;
 pub mod customer;
 pub mod date_range;
 pub mod invoice;
+pub mod subscription;
