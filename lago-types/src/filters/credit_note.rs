@@ -131,15 +131,15 @@ impl ListFilters for CreditNoteFilter {
         }
 
         if let Some(ref reason) = self.reason {
-            params.push(("reason", format!("{reason:?}").to_lowercase()));
+            params.push(("reason", reason.to_string()));
         }
 
         if let Some(ref status) = self.credit_status {
-            params.push(("credit_status", format!("{status:?}").to_lowercase()));
+            params.push(("credit_status", status.to_string()));
         }
 
         if let Some(ref status) = self.refund_status {
-            params.push(("refund_status", format!("{status:?}").to_lowercase()));
+            params.push(("refund_status", status.to_string()));
         }
 
         if let Some(ref number) = self.invoice_number {

@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use strum_macros::EnumString;
+use strum_macros::{Display, EnumString};
 use uuid::Uuid;
 
 /// Represents a credit note in the Lago billing system.
@@ -63,7 +63,7 @@ pub struct CreditNote {
 }
 
 /// Status of the credit on a credit note
-#[derive(Debug, Clone, Serialize, Deserialize, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Display, EnumString, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum CreditNoteCreditStatus {
@@ -73,7 +73,7 @@ pub enum CreditNoteCreditStatus {
 }
 
 /// Status of a refund on a credit note
-#[derive(Debug, Clone, Serialize, Deserialize, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Display, EnumString, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum CreditNoteRefundStatus {
@@ -83,7 +83,7 @@ pub enum CreditNoteRefundStatus {
 }
 
 /// Reason for issuing a credit note
-#[derive(Debug, Clone, Serialize, Deserialize, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Display, EnumString, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum CreditNoteReason {
