@@ -438,6 +438,77 @@ let event = client.get_event(request).await?;
 println!("Event code: {}, timestamp: {}", event.event.code, event.event.timestamp);
 ```
 
+### Plans
+
+```rust
+use lago_types::{
+    models::{ChargeModel, PaginationParams, PlanInterval},
+    requests::plan::{
+        CreatePlanChargeInput, CreatePlanInput, CreatePlanRequest, DeletePlanRequest,
+        GetPlanRequest, ListPlansRequest, UpdatePlanInput, UpdatePlanRequest,
+    },
+};
+
+// List all plans
+let plans = client.list_plans(None).await?;
+
+// List plans with pagination
+let request = ListPlansRequest::new()
+    .with_pagination(PaginationParams::default().with_per_page(20));
+let plans = client.list_plans(Some(request)).await?;
+
+// Get a specific plan by code
+let request = GetPlanRequest::new("starter_plan".to_string());
+let plan = client.get_plan(request).await?;
+
+// Create a basic plan
+let plan_input = CreatePlanInput::new(
+    "Starter Plan".to_string(),
+    "starter_plan".to_string(),
+    PlanInterval::Monthly,
+    9900, // $99.00 in cents
+    "USD".to_string(),
+)
+.with_description("Our starter plan".to_string())
+.with_pay_in_advance(true)
+.with_trial_period(14.0);
+
+let request = CreatePlanRequest::new(plan_input);
+let created = client.create_plan(request).await?;
+
+// Create a plan with usage-based charges
+let charge = CreatePlanChargeInput::new(
+    "billable_metric_lago_id".to_string(),
+    ChargeModel::Standard,
+)
+.with_invoiceable(true)
+.with_properties(serde_json::json!({"amount": "0.01"}));
+
+let plan_input = CreatePlanInput::new(
+    "Usage Plan".to_string(),
+    "usage_plan".to_string(),
+    PlanInterval::Monthly,
+    4900,
+    "USD".to_string(),
+)
+.with_charges(vec![charge]);
+
+let request = CreatePlanRequest::new(plan_input);
+let created = client.create_plan(request).await?;
+
+// Update a plan
+let update_input = UpdatePlanInput::new()
+    .with_name("Updated Starter Plan".to_string())
+    .with_amount_cents(12900);
+
+let request = UpdatePlanRequest::new("starter_plan".to_string(), update_input);
+let updated = client.update_plan(request).await?;
+
+// Delete a plan
+let request = DeletePlanRequest::new("starter_plan".to_string());
+let deleted = client.delete_plan(request).await?;
+```
+
 ### Credit Notes
 
 ```rust
@@ -531,6 +602,7 @@ See the `examples/` directory for complete usage examples:
 - `coupon.rs` - Coupon CRUD operations
 - `event.rs` - Event creation and retrieval
 - `credit_note.rs` - Credit note operations
+- `plan.rs` - Plan CRUD operations
 
 ```bash
 # Run the basic usage example
@@ -562,6 +634,9 @@ cargo run --example event
 
 # Run the credit notes example
 cargo run --example credit_note
+
+# Run the plans example
+cargo run --example plan
 ```
 
 ## Release

@@ -8,4 +8,5 @@ pub mod customer;
 pub mod customer_usage;
 pub mod event;
 pub mod invoice;
+pub mod plan;
 pub mod subscription;

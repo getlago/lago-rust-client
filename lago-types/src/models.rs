@@ -10,6 +10,7 @@ pub mod customer_usage;
 pub mod event;
 pub mod invoice;
 pub mod pagination;
+pub mod plan;
 pub mod subscription;
 pub mod usage_threshold;
 
@@ -25,5 +26,6 @@ pub use customer_usage::*;
 pub use event::*;
 pub use invoice::*;
 pub use pagination::*;
+pub use plan::*;
 pub use subscription::*;
 pub use usage_threshold::*;
