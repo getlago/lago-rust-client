@@ -401,6 +401,43 @@ let request = DeleteCouponRequest::new("SUMMER50".to_string());
 let deleted = client.delete_coupon(request).await?;
 ```
 
+### Events
+
+```rust
+use lago_types::requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest};
+use serde_json::json;
+
+// Create a usage event for a customer
+let event_input = CreateEventInput::for_customer(
+    "transaction_123".to_string(),
+    "customer_456".to_string(),
+    "api_calls".to_string(),
+)
+.with_properties(json!({"calls": 150}))
+.with_timestamp(1705312200);
+
+let request = CreateEventRequest::new(event_input);
+let created = client.create_event(request).await?;
+println!("Created event: {}", created.event.transaction_id);
+
+// Create a usage event for a subscription
+let event_input = CreateEventInput::for_subscription(
+    "transaction_456".to_string(),
+    "subscription_789".to_string(),
+    "storage_gb".to_string(),
+)
+.with_properties(json!({"gb": 50.5}))
+.with_precise_total_amount_cents(1234567);
+
+let request = CreateEventRequest::new(event_input);
+let created = client.create_event(request).await?;
+
+// Get a specific event by transaction ID
+let request = GetEventRequest::new("transaction_123".to_string());
+let event = client.get_event(request).await?;
+println!("Event code: {}, timestamp: {}", event.event.code, event.event.timestamp);
+```
+
 ## Error Handling
 
 The client uses the `lago-types` error system:
@@ -440,6 +477,7 @@ See the `examples/` directory for complete usage examples:
 - `invoice.rs` - Invoice operations including preview
 - `applied_coupon.rs` - Applied coupons listing and filtering
 - `coupon.rs` - Coupon CRUD operations
+- `event.rs` - Usage events creation and retrieval
 
 ```bash
 # Run the basic usage example
@@ -465,6 +503,9 @@ cargo run --example applied_coupon
 
 # Run the coupons example
 cargo run --example coupon
+
+# Run the events example
+cargo run --example event
 ```
 
 ## Release
