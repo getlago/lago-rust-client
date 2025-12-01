@@ -202,6 +202,47 @@ let request = DeleteSubscriptionRequest::new("sub_001".to_string());
 let subscription = client.delete_subscription(request).await?;
 ```
 
+### Plans
+
+```rust
+use lago_types::requests::plan::{
+    CreatePlanInput, CreatePlanRequest, GetPlanRequest, ListPlansRequest,
+    UpdatePlanInput, UpdatePlanRequest, DeletePlanRequest,
+};
+// Create a plan
+let input = CreatePlanInput::builder()
+    .code("starter_plan".to_string())
+    .name("Starter Plan".to_string())
+    .description(Some("A basic starter plan".to_string()))
+    .amount_cents(1000)
+    .currency("USD".to_string())
+    .interval("month".to_string())
+    .trial_period_days(Some(14))
+    .build();
+let request = CreatePlanRequest::new(input);
+let plan = client.create_plan(request).await?;
+// List plans with pagination
+let request = ListPlansRequest::builder()
+    .per_page(50)
+    .page(1)
+    .build();
+let plans = client.list_plans(Some(request)).await?;
+// Get a specific plan
+let request = GetPlanRequest::new("starter_plan".to_string());
+let plan = client.get_plan(request).await?;
+// Update a plan
+let input = UpdatePlanInput::builder()
+    .name(Some("Starter Plan Updated".to_string()))
+    .description(Some("Updated description".to_string()))
+    .amount_cents(Some(1200))
+    .build();
+let request = UpdatePlanRequest::new("starter_plan".to_string(), input);
+let plan = client.update_plan(request).await?;
+// Delete a plan
+let request = DeletePlanRequest::new("starter_plan".to_string());
+client.delete_plan(request).await?;
+```
+
 ### Customer Usage
 
 ```rust

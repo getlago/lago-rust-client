@@ -6,7 +6,7 @@ A comprehensive type library for the Lago billing system, providing Rust data st
 
 This crate contains all the type definitions needed to interact with the Lago billing API, including:
 
-- **Models**: Core domain objects like `Customer`, `Invoice`, `CreditNote`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`, `Event`
+- **Models**: Core domain objects like `Customer`, `CustomerUsage`, `Invoice`, `CreditNote`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`, `Event`
 - **Requests**: Structured request types for API operations
 - **Responses**: Typed responses from API endpoints
 - **Filters**: Query parameter builders for list operations
@@ -391,6 +391,30 @@ let create_request = CreateCreditNoteRequest::new(input);
 let update_input = UpdateCreditNoteInput::new()
     .with_refund_status(CreditNoteRefundStatus::Succeeded);
 let update_request = UpdateCreditNoteRequest::new("credit-note-uuid".to_string(), update_input);
+```
+
+### Customer Usage
+
+Retrieve current usage data for a customer's subscription:
+
+```rust
+use lago_types::requests::customer_usage::GetCustomerCurrentUsageRequest;
+
+// Get current usage for a customer's subscription
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+);
+
+// Get usage without applying taxes
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+)
+.with_apply_taxes(false);
+
+// Convert to query parameters
+let params = request.to_query_params();
 ```
 
 ## Module Structure

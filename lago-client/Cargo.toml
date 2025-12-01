@@ -1,6 +1,6 @@
 [package]
 name = "lago-client"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Lago API client"
@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/getlago/lago-rust-client"
 
 [dependencies]
-lago-types = { path = "../lago-types" }
+lago-types = "0.1.13"
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
@@ -73,3 +73,7 @@ path = "examples/customer_usage.rs"
 [[example]]
 name = "subscription"
 path = "examples/subscription.rs"
+
+[[example]]
+name = "plan"
+path = "examples/plan.rs"

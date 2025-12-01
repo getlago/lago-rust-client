@@ -561,6 +561,29 @@ let request = UpdateCreditNoteRequest::new("credit-note-lago-id".to_string(), up
 let updated = client.update_credit_note(request).await?;
 ```
 
+### Customer Usage
+
+```rust
+use lago_types::requests::customer_usage::GetCustomerCurrentUsageRequest;
+
+// Get current usage for a customer's subscription
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+);
+let usage = client.get_customer_current_usage(request).await?;
+println!("Total amount: {} cents", usage.customer_usage.total_amount_cents);
+println!("Charges: {:?}", usage.customer_usage.charges_usage.len());
+
+// Get usage without applying taxes
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+)
+.with_apply_taxes(false);
+let usage = client.get_customer_current_usage(request).await?;
+```
+
 ## Error Handling
 
 The client uses the `lago-types` error system:
@@ -602,7 +625,9 @@ See the `examples/` directory for complete usage examples:
 - `coupon.rs` - Coupon CRUD operations
 - `event.rs` - Event creation and retrieval
 - `credit_note.rs` - Credit note operations
+- `customer_usage.rs` - Customer usage retrieval
 - `plan.rs` - Plan CRUD operations
+- `subscription.rs` - Subscription CRUD operations
 
 ```bash
 # Run the basic usage example
@@ -635,8 +660,14 @@ cargo run --example event
 # Run the credit notes example
 cargo run --example credit_note
 
+# Run the customer usage example
+cargo run --example customer_usage
+
 # Run the plans example
 cargo run --example plan
+
+# Run the subscriptions example
+cargo run --example subscription
 ```
 
 ## Release
