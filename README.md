@@ -153,6 +153,129 @@ let request = GetInvoiceRequest::new("invoice-id".to_string());
 let invoice = client.get_invoice(request).await?;
 ```
 
+### Subscriptions
+
+```rust
+use lago_types::requests::subscription::{
+    CreateSubscriptionInput, CreateSubscriptionRequest, GetSubscriptionRequest,
+    ListSubscriptionsRequest, UpdateSubscriptionInput, UpdateSubscriptionRequest,
+    DeleteSubscriptionRequest, ListCustomerSubscriptionsRequest,
+};
+use lago_types::models::{SubscriptionBillingTime, SubscriptionStatus};
+use lago_types::filters::subscription::SubscriptionFilters;
+
+// Create a subscription
+let input = CreateSubscriptionInput::new(
+    "customer_123".to_string(),
+    "starter_plan".to_string(),
+)
+.with_external_id("sub_001".to_string())
+.with_name("My Subscription".to_string())
+.with_billing_time(SubscriptionBillingTime::Calendar);
+
+let request = CreateSubscriptionRequest::new(input);
+let subscription = client.create_subscription(request).await?;
+
+// Get a subscription by external ID
+let request = GetSubscriptionRequest::new("sub_001".to_string());
+let subscription = client.get_subscription(request).await?;
+
+// List all subscriptions with filters
+let filters = SubscriptionFilters::new()
+    .with_status(SubscriptionStatus::Active);
+let request = ListSubscriptionsRequest::new()
+    .with_filters(filters);
+let subscriptions = client.list_subscriptions(Some(request)).await?;
+
+// List a customer's subscriptions
+let request = ListCustomerSubscriptionsRequest::new("customer_123".to_string());
+let subscriptions = client.list_customer_subscriptions(request).await?;
+
+// Update a subscription
+let input = UpdateSubscriptionInput::new()
+    .with_name("Updated Name".to_string());
+let request = UpdateSubscriptionRequest::new("sub_001".to_string(), input);
+let subscription = client.update_subscription(request).await?;
+
+// Delete (terminate) a subscription
+let request = DeleteSubscriptionRequest::new("sub_001".to_string());
+let subscription = client.delete_subscription(request).await?;
+```
+
+### Plans
+
+```rust
+use lago_types::requests::plan::{
+    CreatePlanInput, CreatePlanRequest, GetPlanRequest, ListPlansRequest,
+    UpdatePlanInput, UpdatePlanRequest, DeletePlanRequest,
+};
+// Create a plan
+let input = CreatePlanInput::builder()
+    .code("starter_plan".to_string())
+    .name("Starter Plan".to_string())
+    .description(Some("A basic starter plan".to_string()))
+    .amount_cents(1000)
+    .currency("USD".to_string())
+    .interval("month".to_string())
+    .trial_period_days(Some(14))
+    .build();
+let request = CreatePlanRequest::new(input);
+let plan = client.create_plan(request).await?;
+// List plans with pagination
+let request = ListPlansRequest::builder()
+    .per_page(50)
+    .page(1)
+    .build();
+let plans = client.list_plans(Some(request)).await?;
+// Get a specific plan
+let request = GetPlanRequest::new("starter_plan".to_string());
+let plan = client.get_plan(request).await?;
+// Update a plan
+let input = UpdatePlanInput::builder()
+    .name(Some("Starter Plan Updated".to_string()))
+    .description(Some("Updated description".to_string()))
+    .amount_cents(Some(1200))
+    .build();
+let request = UpdatePlanRequest::new("starter_plan".to_string(), input);
+let plan = client.update_plan(request).await?;
+// Delete a plan
+let request = DeletePlanRequest::new("starter_plan".to_string());
+client.delete_plan(request).await?;
+```
+
+### Customer Usage
+
+```rust
+use lago_types::requests::customer_usage::GetCustomerCurrentUsageRequest;
+
+// Get customer current usage for a subscription
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+);
+let usage = client.get_customer_current_usage(request).await?;
+
+println!("Usage period: {} to {}", usage.customer_usage.from_datetime, usage.customer_usage.to_datetime);
+println!("Total amount: {} cents", usage.customer_usage.total_amount_cents);
+
+// Iterate through charges
+for charge in &usage.customer_usage.charges_usage {
+    println!("{}: {} units, {} cents",
+        charge.billable_metric.name,
+        charge.units,
+        charge.amount_cents
+    );
+}
+
+// Get usage without applying taxes
+let request = GetCustomerCurrentUsageRequest::new(
+    "customer_123".to_string(),
+    "subscription_456".to_string(),
+)
+.with_apply_taxes(false);
+let usage = client.get_customer_current_usage(request).await?;
+```
+
 ## Error Handling
 
 The client provides comprehensive error handling:
