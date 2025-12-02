@@ -630,7 +630,7 @@ name = "lago-client"
 version = "0.1.13"
 dependencies = [
  "anyhow",
- "lago-types 0.1.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lago-types",
  "mockito",
  "reqwest",
  "serde",
@@ -645,22 +645,6 @@ dependencies = [
 [[package]]
 name = "lago-types"
 version = "0.1.13"
-dependencies = [
- "chrono",
- "reqwest",
- "serde",
- "serde_json",
- "strum",
- "strum_macros",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "lago-types"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af4c2f2e3b80a07fa078dd8673ae9fac2499b4771afbb9ba97f2576483673963"
 dependencies = [
  "chrono",
  "reqwest",
