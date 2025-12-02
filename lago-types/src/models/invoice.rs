@@ -42,6 +42,7 @@ pub struct Invoice {
     pub customer: Option<Customer>,
     pub billing_periods: Option<Vec<InvoiceBillingPeriod>>,
     pub metadata: Option<Vec<InvoiceMetadata>>,
+    #[serde(default)]
     pub applied_taxes: Vec<InvoiceAppliedTax>,
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
     /// Fees associated with this invoice (included when fetching a single invoice)

@@ -28,3 +28,52 @@ pub struct GetInvoiceResponse {
 pub struct InvoicePreviewResponse {
     pub invoice: Invoice,
 }
+
+/// Response containing a created invoice.
+///
+/// This struct represents the API response for the create invoice endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateInvoiceResponse {
+    pub invoice: Invoice,
+}
+
+/// Response containing an updated invoice.
+///
+/// This struct represents the API response for the update invoice endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateInvoiceResponse {
+    pub invoice: Invoice,
+}
+
+/// Response containing a refreshed invoice.
+///
+/// This struct represents the API response for the refresh invoice endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RefreshInvoiceResponse {
+    pub invoice: Invoice,
+}
+
+/// Response containing a downloaded invoice.
+///
+/// This struct represents the API response for the download invoice endpoint.
+/// The response includes the invoice with a file_url field containing the PDF URL.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DownloadInvoiceResponse {
+    pub invoice: Invoice,
+}
+
+/// Response for retrying an invoice finalization.
+///
+/// This struct represents the API response for the retry invoice endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RetryInvoiceResponse {
+    pub invoice: Invoice,
+}
+
+/// Response for retrying an invoice payment.
+///
+/// This struct represents the API response for the retry payment endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RetryInvoicePaymentResponse {
+    pub invoice: Invoice,
+}

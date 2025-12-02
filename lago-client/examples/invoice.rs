@@ -1,7 +1,7 @@
 use lago_client::LagoClient;
 use lago_types::requests::invoice::{
-    BillingTime, GetInvoiceRequest, InvoicePreviewCoupon, InvoicePreviewCustomer,
-    InvoicePreviewInput, InvoicePreviewRequest, InvoicePreviewSubscriptions, ListInvoicesRequest,
+    DownloadInvoiceRequest, GetInvoiceRequest, ListCustomerInvoicesRequest, ListInvoicesRequest,
+    UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest,
 };
 
 #[tokio::main]
@@ -13,76 +13,58 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let invoices = client.list_invoices(Some(list_request)).await?;
     println!("Found {} invoices", invoices.invoices.len());
 
-    // Example 2: Get a specific invoice by ID
-    let get_request = GetInvoiceRequest::new("invoice_id_here".to_string());
-    let invoice = client.get_invoice(get_request).await?;
-    println!("Retrieved invoice: {}", invoice.invoice.number);
+    for invoice in &invoices.invoices {
+        println!(
+            "  Invoice {}: {} {} - {:?}",
+            invoice.number, invoice.total_amount_cents, invoice.currency, invoice.status
+        );
+    }
 
-    // Example 3: Preview an invoice for an existing customer with a new subscription
-    let preview_input = InvoicePreviewInput::for_customer("customer_123".to_string())
-        .with_plan_code("startup".to_string())
-        .with_billing_time(BillingTime::Calendar);
-
-    let preview_request = InvoicePreviewRequest::new(preview_input);
-    let preview = client.preview_invoice(preview_request).await?;
-    println!(
-        "Preview invoice total: {} cents",
-        preview.invoice.total_amount_cents
-    );
-
-    // Example 4: Preview an invoice with inline customer details
-    let customer = InvoicePreviewCustomer::new()
-        .with_name("New Customer".to_string())
-        .with_currency("USD".to_string())
-        .with_address(
-            "123 Main St".to_string(),
-            None,
-            Some("San Francisco".to_string()),
-            Some("CA".to_string()),
-            Some("US".to_string()),
+    // Example 2: Get a specific invoice by ID (using first invoice from list)
+    if let Some(first_invoice) = invoices.invoices.first() {
+        let invoice_id = first_invoice.lago_id.as_ref().unwrap();
+        let get_request = GetInvoiceRequest::new(invoice_id.to_string());
+        let invoice = client.get_invoice(get_request).await?;
+        println!("\nRetrieved invoice: {}", invoice.invoice.number);
+        println!("  Status: {:?}", invoice.invoice.status);
+        println!(
+            "  Total: {} {}",
+            invoice.invoice.total_amount_cents, invoice.invoice.currency
         );
 
-    let preview_input = InvoicePreviewInput::new(customer)
-        .with_plan_code("hobby".to_string())
-        .with_billing_time(BillingTime::Anniversary)
-        .with_subscription_at("2024-01-01T00:00:00Z".to_string());
+        // Example 3: List invoices for the same customer
+        if let Some(customer) = &first_invoice.customer {
+            if let Some(customer_id) = &customer.external_id {
+                let list_customer_request = ListCustomerInvoicesRequest::new(customer_id.clone());
+                let customer_invoices =
+                    client.list_customer_invoices(list_customer_request).await?;
+                println!(
+                    "\nCustomer {} has {} invoices",
+                    customer_id,
+                    customer_invoices.invoices.len()
+                );
+            }
+        }
 
-    let preview_request = InvoicePreviewRequest::new(preview_input);
-    let preview = client.preview_invoice(preview_request).await?;
-    println!(
-        "Preview invoice for new customer: {} cents",
-        preview.invoice.total_amount_cents
-    );
+        // Example 4: Update an invoice's metadata
+        let metadata =
+            UpdateInvoiceMetadataInput::new("example_key".to_string(), "example_value".to_string());
+        let update_input = UpdateInvoiceInput::new().with_metadata(vec![metadata]);
+        let update_request = UpdateInvoiceRequest::new(invoice_id.to_string(), update_input);
+        let updated = client.update_invoice(update_request).await?;
+        println!("\nUpdated invoice {} with metadata", updated.invoice.number);
 
-    // Example 5: Preview an invoice with coupons
-    let coupon = InvoicePreviewCoupon::new("DISCOUNT20".to_string())
-        .with_name("20% Discount".to_string())
-        .with_percentage("20".to_string());
-
-    let preview_input = InvoicePreviewInput::for_customer("cust_123".to_string())
-        .with_plan_code("hobby".to_string())
-        .with_coupons(vec![coupon]);
-
-    let preview_request = InvoicePreviewRequest::new(preview_input);
-    let preview = client.preview_invoice(preview_request).await?;
-    println!(
-        "Preview with coupon: {} cents (coupons: {} cents)",
-        preview.invoice.total_amount_cents, preview.invoice.coupons_amount_cents
-    );
-
-    // Example 6: Preview an invoice for existing subscriptions with plan upgrade
-    let subscriptions = InvoicePreviewSubscriptions::new(vec!["sub_123".to_string()])
-        .with_plan_code("in_advance".to_string());
-
-    let preview_input =
-        InvoicePreviewInput::for_customer("cust_123".to_string()).with_subscriptions(subscriptions);
-
-    let preview_request = InvoicePreviewRequest::new(preview_input);
-    let preview = client.preview_invoice(preview_request).await?;
-    println!(
-        "Preview for plan upgrade: {} cents",
-        preview.invoice.total_amount_cents
-    );
+        // Example 5: Download an invoice PDF
+        let download_request = DownloadInvoiceRequest::new(invoice_id.to_string());
+        let downloaded = client.download_invoice(download_request).await?;
+        if let Some(url) = downloaded.invoice.file_url {
+            println!("\nInvoice PDF URL: {}", url);
+        } else {
+            println!("\nInvoice PDF not yet available");
+        }
+    } else {
+        println!("No invoices found, skipping detailed examples");
+    }
 
     Ok(())
 }
