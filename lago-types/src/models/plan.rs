@@ -144,8 +144,8 @@ pub struct PlanTax {
     pub name: Option<String>,
     /// Code for the tax.
     pub code: Option<String>,
-    /// Tax rate as a string (percentage).
-    pub rate: Option<String>,
+    /// Tax rate (percentage).
+    pub rate: Option<f64>,
     /// Description of the tax.
     pub description: Option<String>,
     /// Whether tax is applied by default.
