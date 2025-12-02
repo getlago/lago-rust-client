@@ -4,6 +4,7 @@ pub mod applied_coupon;
 pub mod billable_metric;
 pub mod common;
 pub mod coupon;
+pub mod credit_note;
 pub mod customer;
 pub mod date_range;
 pub mod invoice;

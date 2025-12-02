@@ -6,7 +6,7 @@ A comprehensive type library for the Lago billing system, providing Rust data st
 
 This crate contains all the type definitions needed to interact with the Lago billing API, including:
 
-- **Models**: Core domain objects like `Customer`, `Invoice`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `Event`, `UsageThreshold`
+- **Models**: Core domain objects like `Customer`, `Invoice`, `CreditNote`, `Coupon`, `AppliedCoupon`, `ActivityLogObject`, `ApiLogObject`, `UsageThreshold`, `Event`
 - **Requests**: Structured request types for API operations
 - **Responses**: Typed responses from API endpoints
 - **Filters**: Query parameter builders for list operations
@@ -339,6 +339,58 @@ let request = CreateEventRequest::new(event);
 
 // Get a specific event by transaction ID
 let get_request = GetEventRequest::new("transaction_123".to_string());
+```
+
+### Credit Notes
+
+Work with credit notes:
+
+```rust
+use lago_types::{
+    models::{CreditNoteReason, CreditNoteRefundStatus, PaginationParams},
+    requests::credit_note::{
+        CreateCreditNoteInput, CreateCreditNoteItemInput, CreateCreditNoteRequest,
+        GetCreditNoteRequest, ListCreditNotesRequest, UpdateCreditNoteInput, UpdateCreditNoteRequest,
+    },
+    filters::credit_note::CreditNoteFilter,
+};
+
+// List credit notes with filters
+let request = ListCreditNotesRequest::new()
+    .with_pagination(
+        PaginationParams::new()
+            .with_page(1)
+            .with_per_page(20)
+    )
+    .with_filters(
+        CreditNoteFilter::new()
+            .with_external_customer_id("customer_123".to_string())
+            .with_reason(CreditNoteReason::Other)
+            .with_date_range("2024-01-01".to_string(), "2024-12-31".to_string())
+    );
+let params = request.to_query_params();
+
+// Get a specific credit note
+let get_request = GetCreditNoteRequest::new("credit-note-uuid".to_string());
+
+// Create a credit note
+let items = vec![
+    CreateCreditNoteItemInput::new("fee_lago_id".to_string(), 1000),
+];
+let input = CreateCreditNoteInput::new(
+    "invoice_lago_id".to_string(),
+    CreditNoteReason::Other,
+    1000, // credit_amount_cents
+    0,    // refund_amount_cents
+    items,
+)
+.with_description("Credit for billing adjustment".to_string());
+let create_request = CreateCreditNoteRequest::new(input);
+
+// Update a credit note's refund status
+let update_input = UpdateCreditNoteInput::new()
+    .with_refund_status(CreditNoteRefundStatus::Succeeded);
+let update_request = UpdateCreditNoteRequest::new("credit-note-uuid".to_string(), update_input);
 ```
 
 ## Module Structure

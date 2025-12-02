@@ -44,6 +44,98 @@ pub struct Invoice {
     pub metadata: Option<Vec<InvoiceMetadata>>,
     pub applied_taxes: Vec<InvoiceAppliedTax>,
     pub applied_usage_thresholds: Option<Vec<InvoiceAppliedUsageThreshold>>,
+    /// Fees associated with this invoice (included when fetching a single invoice)
+    pub fees: Option<Vec<Fee>>,
+}
+
+/// Represents a fee line item on an invoice.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Fee {
+    /// Unique identifier for the fee in Lago
+    pub lago_id: Uuid,
+    /// Reference to the charge that generated this fee
+    pub lago_charge_id: Option<Uuid>,
+    /// Reference to the invoice this fee belongs to
+    pub lago_invoice_id: Option<Uuid>,
+    /// Reference to the subscription
+    pub lago_subscription_id: Option<Uuid>,
+    /// Reference to the customer
+    pub lago_customer_id: Option<Uuid>,
+    /// External customer ID
+    pub external_customer_id: Option<String>,
+    /// External subscription ID
+    pub external_subscription_id: Option<String>,
+    /// Fee amount in cents (excluding taxes)
+    pub amount_cents: i64,
+    /// Currency for the amount
+    pub amount_currency: String,
+    /// Precise amount as string for decimal precision
+    pub precise_amount: Option<String>,
+    /// Total amount including taxes in cents
+    pub total_amount_cents: i64,
+    /// Currency for total amount
+    pub total_amount_currency: String,
+    /// Precise total amount as string
+    pub precise_total_amount: Option<String>,
+    /// Tax amount in cents
+    pub taxes_amount_cents: i64,
+    /// Precise tax amount as string
+    pub taxes_precise_amount: Option<String>,
+    /// Tax rate percentage
+    pub taxes_rate: f64,
+    /// Number of units
+    pub units: String,
+    /// Precise unit amount as string
+    pub precise_unit_amount: Option<String>,
+    /// Total aggregated units
+    pub total_aggregated_units: Option<String>,
+    /// Number of events that contributed to this fee
+    pub events_count: Option<i64>,
+    /// Payment status of the fee
+    pub payment_status: FeePaymentStatus,
+    /// Whether this fee is paid in advance
+    pub pay_in_advance: Option<bool>,
+    /// Whether this fee is invoiceable
+    pub invoiceable: Option<bool>,
+    /// Start date of the billing period
+    pub from_date: Option<String>,
+    /// End date of the billing period
+    pub to_date: Option<String>,
+    /// When the fee was created
+    pub created_at: DateTime<Utc>,
+    /// When payment succeeded
+    pub succeeded_at: Option<DateTime<Utc>>,
+    /// When payment failed
+    pub failed_at: Option<DateTime<Utc>>,
+    /// When refunded
+    pub refunded_at: Option<DateTime<Utc>>,
+    /// Fee item details
+    pub item: Option<FeeItem>,
+}
+
+/// Payment status of a fee
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum FeePaymentStatus {
+    Pending,
+    Succeeded,
+    Failed,
+    Refunded,
+}
+
+/// Fee item details
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FeeItem {
+    /// Type of fee item (charge, add_on, subscription, credit, commitment)
+    #[serde(rename = "type")]
+    pub item_type: String,
+    /// Code identifying the item
+    pub code: String,
+    /// Display name
+    pub name: String,
+    /// Description of the item
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, EnumString)]

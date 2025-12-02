@@ -1,6 +1,6 @@
 [package]
 name = "lago-types"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Types definitions for Lago API"

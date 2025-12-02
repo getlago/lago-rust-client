@@ -438,6 +438,58 @@ let event = client.get_event(request).await?;
 println!("Event code: {}, timestamp: {}", event.event.code, event.event.timestamp);
 ```
 
+### Credit Notes
+
+```rust
+use lago_types::{
+    filters::credit_note::CreditNoteFilter,
+    models::{CreditNoteReason, CreditNoteRefundStatus, PaginationParams},
+    requests::credit_note::{
+        CreateCreditNoteInput, CreateCreditNoteItemInput, CreateCreditNoteRequest,
+        GetCreditNoteRequest, ListCreditNotesRequest, UpdateCreditNoteInput, UpdateCreditNoteRequest,
+    },
+};
+
+// List all credit notes
+let credit_notes = client.list_credit_notes(None).await?;
+
+// List credit notes with filters
+let request = ListCreditNotesRequest::new()
+    .with_pagination(PaginationParams::default().with_page(1).with_per_page(20))
+    .with_filters(
+        CreditNoteFilter::new()
+            .with_external_customer_id("customer_123".to_string())
+            .with_reason(CreditNoteReason::Other)
+            .with_date_range("2024-01-01".to_string(), "2024-12-31".to_string())
+    );
+let filtered = client.list_credit_notes(Some(request)).await?;
+
+// Get a specific credit note
+let request = GetCreditNoteRequest::new("credit-note-lago-id".to_string());
+let credit_note = client.get_credit_note(request).await?;
+
+// Create a credit note
+let items = vec![
+    CreateCreditNoteItemInput::new("fee_lago_id".to_string(), 1000),
+];
+let input = CreateCreditNoteInput::new(
+    "invoice_lago_id".to_string(),
+    CreditNoteReason::Other,
+    1000, // credit_amount_cents
+    0,    // refund_amount_cents
+    items,
+)
+.with_description("Credit for billing adjustment".to_string());
+let request = CreateCreditNoteRequest::new(input);
+let created = client.create_credit_note(request).await?;
+
+// Update a credit note's refund status
+let update_input = UpdateCreditNoteInput::new()
+    .with_refund_status(CreditNoteRefundStatus::Succeeded);
+let request = UpdateCreditNoteRequest::new("credit-note-lago-id".to_string(), update_input);
+let updated = client.update_credit_note(request).await?;
+```
+
 ## Error Handling
 
 The client uses the `lago-types` error system:
@@ -477,7 +529,8 @@ See the `examples/` directory for complete usage examples:
 - `invoice.rs` - Invoice operations including preview
 - `applied_coupon.rs` - Applied coupons listing and filtering
 - `coupon.rs` - Coupon CRUD operations
-- `event.rs` - Usage events creation and retrieval
+- `event.rs` - Event creation and retrieval
+- `credit_note.rs` - Credit note operations
 
 ```bash
 # Run the basic usage example
@@ -506,6 +559,9 @@ cargo run --example coupon
 
 # Run the events example
 cargo run --example event
+
+# Run the credit notes example
+cargo run --example credit_note
 ```
 
 ## Release
