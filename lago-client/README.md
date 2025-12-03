@@ -112,7 +112,12 @@ Retry modes:
 ### Invoices
 
 ```rust
-use lago_types::requests::invoice::{ListInvoicesRequest, GetInvoiceRequest};
+use lago_types::requests::invoice::{
+    ListInvoicesRequest, GetInvoiceRequest, CreateInvoiceInput, CreateInvoiceFeeInput,
+    CreateInvoiceRequest, UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest,
+    ListCustomerInvoicesRequest, RefreshInvoiceRequest, DownloadInvoiceRequest,
+    RetryInvoiceRequest, RetryInvoicePaymentRequest,
+};
 
 // List invoices with optional filters
 let request = ListInvoicesRequest::new();
@@ -121,6 +126,50 @@ let invoices = client.list_invoices(Some(request)).await?;
 // Get a specific invoice
 let request = GetInvoiceRequest::new("invoice-id".to_string());
 let invoice = client.get_invoice(request).await?;
+
+// Create a one-off invoice
+let fee = CreateInvoiceFeeInput::new("setup_fee".to_string(), 1.0)
+    .with_unit_amount_cents(9900)
+    .with_description("One-time setup fee".to_string());
+let input = CreateInvoiceInput::new(
+    "customer_123".to_string(),
+    "USD".to_string(),
+    vec![fee],
+);
+let request = CreateInvoiceRequest::new(input);
+let created = client.create_invoice(request).await?;
+
+// Update invoice payment status and metadata
+let metadata = UpdateInvoiceMetadataInput::new(
+    "payment_ref".to_string(),
+    "REF-12345".to_string(),
+);
+let input = UpdateInvoiceInput::new()
+    .with_payment_status("succeeded".to_string())
+    .with_metadata(vec![metadata]);
+let request = UpdateInvoiceRequest::new("invoice-lago-id".to_string(), input);
+let updated = client.update_invoice(request).await?;
+
+// List invoices for a specific customer
+let request = ListCustomerInvoicesRequest::new("customer_123".to_string());
+let invoices = client.list_customer_invoices(request).await?;
+
+// Refresh a draft invoice
+let request = RefreshInvoiceRequest::new("invoice-lago-id".to_string());
+let refreshed = client.refresh_invoice(request).await?;
+
+// Download invoice PDF
+let request = DownloadInvoiceRequest::new("invoice-lago-id".to_string());
+let invoice = client.download_invoice(request).await?;
+println!("PDF URL: {:?}", invoice.invoice.file_url);
+
+// Retry a failed invoice finalization
+let request = RetryInvoiceRequest::new("invoice-lago-id".to_string());
+let retried = client.retry_invoice(request).await?;
+
+// Retry a failed invoice payment
+let request = RetryInvoicePaymentRequest::new("invoice-lago-id".to_string());
+let retried = client.retry_invoice_payment(request).await?;
 ```
 
 ### Invoice Preview

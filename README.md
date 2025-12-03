@@ -276,6 +276,40 @@ let request = GetCustomerCurrentUsageRequest::new(
 let usage = client.get_customer_current_usage(request).await?;
 ```
 
+### Payments
+
+```rust
+use lago_types::requests::payment::{
+    CreatePaymentInput, CreatePaymentRequest, ListCustomerPaymentsRequest, ListPaymentsRequest,
+};
+
+// List all payments
+let request = ListPaymentsRequest::new();
+let payments = client.list_payments(Some(request)).await?;
+println!("Found {} payments", payments.payments.len());
+
+// List payments for a specific customer
+let request = ListCustomerPaymentsRequest::new("customer_123".to_string());
+let payments = client.list_customer_payments(request).await?;
+
+// List payments filtered by external customer ID
+let request = ListPaymentsRequest::new()
+    .with_external_customer_id("customer_123".to_string());
+let payments = client.list_payments(Some(request)).await?;
+
+// Create a manual payment
+let input = CreatePaymentInput::new(
+    "invoice_id_here".to_string(),
+    10000, // amount in cents
+    "payment-ref-001".to_string(),
+)
+.with_paid_at("2025-01-15".to_string());
+
+let request = CreatePaymentRequest::new(input);
+let payment = client.create_payment(request).await?;
+println!("Created payment: {}", payment.payment.lago_id);
+```
+
 ## Error Handling
 
 The client provides comprehensive error handling:

@@ -437,3 +437,366 @@ impl InvoicePreviewRequest {
         Self { input }
     }
 }
+
+/// Fee input for creating a one-off invoice.
+///
+/// This struct contains the details for a single fee line item
+/// to be included in a one-off invoice.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateInvoiceFeeInput {
+    /// The code of the add-on to charge.
+    pub add_on_code: String,
+    /// The number of units to charge.
+    pub units: f64,
+    /// The price per unit in cents (optional, uses add-on default if not specified).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unit_amount_cents: Option<i64>,
+    /// Optional description for the fee.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// Optional tax codes to apply to this fee.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tax_codes: Option<Vec<String>>,
+}
+
+impl CreateInvoiceFeeInput {
+    /// Creates a new fee input with the required fields.
+    ///
+    /// # Arguments
+    /// * `add_on_code` - The code of the add-on to charge
+    /// * `units` - The number of units to charge
+    ///
+    /// # Returns
+    /// A new `CreateInvoiceFeeInput` instance
+    pub fn new(add_on_code: String, units: f64) -> Self {
+        Self {
+            add_on_code,
+            units,
+            unit_amount_cents: None,
+            description: None,
+            tax_codes: None,
+        }
+    }
+
+    /// Sets a custom unit amount in cents.
+    pub fn with_unit_amount_cents(mut self, unit_amount_cents: i64) -> Self {
+        self.unit_amount_cents = Some(unit_amount_cents);
+        self
+    }
+
+    /// Sets a description for the fee.
+    pub fn with_description(mut self, description: String) -> Self {
+        self.description = Some(description);
+        self
+    }
+
+    /// Sets the tax codes to apply to this fee.
+    pub fn with_tax_codes(mut self, tax_codes: Vec<String>) -> Self {
+        self.tax_codes = Some(tax_codes);
+        self
+    }
+}
+
+/// Input for creating a one-off invoice.
+///
+/// This struct contains all the information needed to create a one-off invoice
+/// for a customer with add-on charges.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateInvoiceInput {
+    /// The external customer ID to create the invoice for.
+    pub external_customer_id: String,
+    /// The currency for the invoice (ISO 4217 code).
+    pub currency: String,
+    /// The list of fees to include in the invoice.
+    pub fees: Vec<CreateInvoiceFeeInput>,
+}
+
+impl CreateInvoiceInput {
+    /// Creates a new invoice input with the required fields.
+    ///
+    /// # Arguments
+    /// * `external_customer_id` - The external ID of the customer
+    /// * `currency` - The currency code (e.g., "USD")
+    /// * `fees` - The list of fees to include
+    ///
+    /// # Returns
+    /// A new `CreateInvoiceInput` instance
+    pub fn new(
+        external_customer_id: String,
+        currency: String,
+        fees: Vec<CreateInvoiceFeeInput>,
+    ) -> Self {
+        Self {
+            external_customer_id,
+            currency,
+            fees,
+        }
+    }
+}
+
+/// Request for creating a one-off invoice.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreateInvoiceRequest {
+    /// The invoice input data.
+    pub invoice: CreateInvoiceInput,
+}
+
+impl CreateInvoiceRequest {
+    /// Creates a new create invoice request.
+    ///
+    /// # Arguments
+    /// * `input` - The invoice input data
+    ///
+    /// # Returns
+    /// A new `CreateInvoiceRequest` instance
+    pub fn new(input: CreateInvoiceInput) -> Self {
+        Self { invoice: input }
+    }
+}
+
+/// Metadata input for updating an invoice.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateInvoiceMetadataInput {
+    /// The ID of an existing metadata entry to update (optional for new entries).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    /// The metadata key.
+    pub key: String,
+    /// The metadata value.
+    pub value: String,
+}
+
+impl UpdateInvoiceMetadataInput {
+    /// Creates a new metadata input.
+    ///
+    /// # Arguments
+    /// * `key` - The metadata key
+    /// * `value` - The metadata value
+    ///
+    /// # Returns
+    /// A new `UpdateInvoiceMetadataInput` instance
+    pub fn new(key: String, value: String) -> Self {
+        Self {
+            id: None,
+            key,
+            value,
+        }
+    }
+
+    /// Creates a metadata input for updating an existing entry.
+    ///
+    /// # Arguments
+    /// * `id` - The ID of the existing metadata entry
+    /// * `key` - The metadata key
+    /// * `value` - The metadata value
+    ///
+    /// # Returns
+    /// A new `UpdateInvoiceMetadataInput` instance
+    pub fn with_id(id: String, key: String, value: String) -> Self {
+        Self {
+            id: Some(id),
+            key,
+            value,
+        }
+    }
+}
+
+/// Input for updating an invoice.
+///
+/// This struct contains the fields that can be updated on an existing invoice.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct UpdateInvoiceInput {
+    /// The payment status of the invoice.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_status: Option<String>,
+    /// Custom metadata for the invoice.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<Vec<UpdateInvoiceMetadataInput>>,
+}
+
+impl UpdateInvoiceInput {
+    /// Creates a new empty update invoice input.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the payment status.
+    ///
+    /// # Arguments
+    /// * `payment_status` - The payment status (e.g., "succeeded", "failed", "pending")
+    pub fn with_payment_status(mut self, payment_status: String) -> Self {
+        self.payment_status = Some(payment_status);
+        self
+    }
+
+    /// Sets the metadata entries.
+    pub fn with_metadata(mut self, metadata: Vec<UpdateInvoiceMetadataInput>) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+}
+
+/// Request for updating an invoice.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateInvoiceRequest {
+    /// The Lago ID of the invoice to update.
+    #[serde(skip)]
+    pub lago_id: String,
+    /// The invoice update data.
+    pub invoice: UpdateInvoiceInput,
+}
+
+impl UpdateInvoiceRequest {
+    /// Creates a new update invoice request.
+    ///
+    /// # Arguments
+    /// * `lago_id` - The Lago ID of the invoice to update
+    /// * `input` - The update input data
+    ///
+    /// # Returns
+    /// A new `UpdateInvoiceRequest` instance
+    pub fn new(lago_id: String, input: UpdateInvoiceInput) -> Self {
+        Self {
+            lago_id,
+            invoice: input,
+        }
+    }
+}
+
+/// Request parameters for listing a customer's invoices.
+///
+/// This struct combines the customer identifier with pagination and filters
+/// to retrieve invoices for a specific customer.
+#[derive(Debug, Clone)]
+pub struct ListCustomerInvoicesRequest {
+    /// The external customer ID.
+    pub external_customer_id: String,
+    /// Pagination parameters.
+    pub pagination: PaginationParams,
+    /// Invoice filters.
+    pub filters: InvoiceFilters,
+}
+
+impl ListCustomerInvoicesRequest {
+    /// Creates a new list customer invoices request.
+    ///
+    /// # Arguments
+    /// * `external_customer_id` - The external customer ID
+    ///
+    /// # Returns
+    /// A new `ListCustomerInvoicesRequest` instance
+    pub fn new(external_customer_id: String) -> Self {
+        Self {
+            external_customer_id,
+            pagination: PaginationParams::default(),
+            filters: InvoiceFilters::default(),
+        }
+    }
+
+    /// Sets the pagination parameters.
+    pub fn with_pagination(mut self, pagination: PaginationParams) -> Self {
+        self.pagination = pagination;
+        self
+    }
+
+    /// Sets the invoice filters.
+    pub fn with_filters(mut self, filters: InvoiceFilters) -> Self {
+        self.filters = filters;
+        self
+    }
+
+    /// Converts the request parameters into HTTP query parameters.
+    pub fn to_query_params(&self) -> Vec<(&str, String)> {
+        let mut params = self.pagination.to_query_params();
+        params.extend(self.filters.to_query_params());
+        params
+    }
+}
+
+/// Request for refreshing a draft invoice.
+///
+/// Refreshing re-fetches the customer information and recomputes the taxes.
+#[derive(Debug, Clone)]
+pub struct RefreshInvoiceRequest {
+    /// The Lago ID of the invoice to refresh.
+    pub lago_id: String,
+}
+
+impl RefreshInvoiceRequest {
+    /// Creates a new refresh invoice request.
+    ///
+    /// # Arguments
+    /// * `lago_id` - The Lago ID of the invoice to refresh
+    ///
+    /// # Returns
+    /// A new `RefreshInvoiceRequest` instance
+    pub fn new(lago_id: String) -> Self {
+        Self { lago_id }
+    }
+}
+
+/// Request for downloading an invoice PDF.
+///
+/// This triggers the generation of the invoice PDF if not already generated.
+#[derive(Debug, Clone)]
+pub struct DownloadInvoiceRequest {
+    /// The Lago ID of the invoice to download.
+    pub lago_id: String,
+}
+
+impl DownloadInvoiceRequest {
+    /// Creates a new download invoice request.
+    ///
+    /// # Arguments
+    /// * `lago_id` - The Lago ID of the invoice to download
+    ///
+    /// # Returns
+    /// A new `DownloadInvoiceRequest` instance
+    pub fn new(lago_id: String) -> Self {
+        Self { lago_id }
+    }
+}
+
+/// Request for retrying a failed invoice finalization.
+///
+/// This retries the finalization process for invoices that failed during generation.
+#[derive(Debug, Clone)]
+pub struct RetryInvoiceRequest {
+    /// The Lago ID of the invoice to retry.
+    pub lago_id: String,
+}
+
+impl RetryInvoiceRequest {
+    /// Creates a new retry invoice request.
+    ///
+    /// # Arguments
+    /// * `lago_id` - The Lago ID of the invoice to retry
+    ///
+    /// # Returns
+    /// A new `RetryInvoiceRequest` instance
+    pub fn new(lago_id: String) -> Self {
+        Self { lago_id }
+    }
+}
+
+/// Request for retrying a failed invoice payment.
+///
+/// This resends the invoice for collection and retries the payment with the payment provider.
+#[derive(Debug, Clone)]
+pub struct RetryInvoicePaymentRequest {
+    /// The Lago ID of the invoice to retry payment for.
+    pub lago_id: String,
+}
+
+impl RetryInvoicePaymentRequest {
+    /// Creates a new retry invoice payment request.
+    ///
+    /// # Arguments
+    /// * `lago_id` - The Lago ID of the invoice to retry payment for
+    ///
+    /// # Returns
+    /// A new `RetryInvoicePaymentRequest` instance
+    pub fn new(lago_id: String) -> Self {
+        Self { lago_id }
+    }
+}

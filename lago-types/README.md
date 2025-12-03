@@ -85,6 +85,65 @@ let request = ListInvoicesRequest::new()
 let params = request.to_query_params();
 ```
 
+### Invoice Operations
+
+Work with invoices including creation, updates, and management:
+
+```rust
+use lago_types::requests::invoice::{
+    // Preview types
+    BillingTime, InvoicePreviewInput, InvoicePreviewRequest,
+    InvoicePreviewCustomer, InvoicePreviewCoupon, InvoicePreviewSubscriptions,
+    // Create types
+    CreateInvoiceInput, CreateInvoiceFeeInput, CreateInvoiceRequest,
+    // Update types
+    UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest,
+    // List types
+    ListCustomerInvoicesRequest,
+    // Action types
+    RefreshInvoiceRequest, DownloadInvoiceRequest, RetryInvoiceRequest, RetryInvoicePaymentRequest,
+};
+
+// Create a one-off invoice
+let fee = CreateInvoiceFeeInput::new("setup_fee".to_string(), 1.0)
+    .with_unit_amount_cents(9900)
+    .with_description("One-time setup fee".to_string())
+    .with_tax_codes(vec!["vat_20".to_string()]);
+
+let input = CreateInvoiceInput::new(
+    "customer_123".to_string(),
+    "USD".to_string(),
+    vec![fee],
+);
+let request = CreateInvoiceRequest::new(input);
+
+// Update an invoice
+let metadata = UpdateInvoiceMetadataInput::new(
+    "payment_ref".to_string(),
+    "REF-12345".to_string(),
+);
+let input = UpdateInvoiceInput::new()
+    .with_payment_status("succeeded".to_string())
+    .with_metadata(vec![metadata]);
+let request = UpdateInvoiceRequest::new("invoice-lago-id".to_string(), input);
+
+// List customer invoices
+let request = ListCustomerInvoicesRequest::new("customer_123".to_string())
+    .with_pagination(PaginationParams::new().with_per_page(20));
+
+// Refresh a draft invoice
+let request = RefreshInvoiceRequest::new("invoice-lago-id".to_string());
+
+// Download invoice PDF
+let request = DownloadInvoiceRequest::new("invoice-lago-id".to_string());
+
+// Retry failed invoice finalization
+let request = RetryInvoiceRequest::new("invoice-lago-id".to_string());
+
+// Retry failed payment
+let request = RetryInvoicePaymentRequest::new("invoice-lago-id".to_string());
+```
+
 ### Invoice Preview
 
 Preview an invoice before creating it:
