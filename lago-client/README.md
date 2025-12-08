@@ -453,7 +453,10 @@ let deleted = client.delete_coupon(request).await?;
 ### Events
 
 ```rust
-use lago_types::requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest};
+use lago_types::{
+    models::PaginationParams,
+    requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest, ListEventsRequest},
+};
 use serde_json::json;
 
 // Create a usage event for a customer
@@ -485,6 +488,22 @@ let created = client.create_event(request).await?;
 let request = GetEventRequest::new("transaction_123".to_string());
 let event = client.get_event(request).await?;
 println!("Event code: {}, timestamp: {}", event.event.code, event.event.timestamp);
+
+// List all events
+let events = client.list_events(None).await?;
+println!("Found {} events", events.events.len());
+
+// List events with filters
+let request = ListEventsRequest::new()
+    .with_pagination(PaginationParams::new().with_per_page(50))
+    .with_external_subscription_id("subscription_123".to_string())
+    .with_code("api_calls".to_string())
+    .with_timestamp_range(
+        "2024-01-01T00:00:00Z".to_string(),
+        "2024-01-31T23:59:59Z".to_string(),
+    );
+let filtered_events = client.list_events(Some(request)).await?;
+println!("Found {} filtered events", filtered_events.events.len());
 ```
 
 ### Plans

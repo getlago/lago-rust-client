@@ -1,7 +1,8 @@
 use lago_client::LagoClient;
 use lago_types::{
     error::LagoError,
-    requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest},
+    models::PaginationParams,
+    requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest, ListEventsRequest},
 };
 use serde_json::json;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -118,6 +119,52 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .with_properties(json!({"calls": 200})); // Different properties
 
     create_or_get_event(&client, second_event).await?;
+
+    // Example 6: List all events
+    println!("\n--- Example 6: List all events ---");
+    match client.list_events(None).await {
+        Ok(response) => {
+            println!(
+                "Found {} events (page {} of {})",
+                response.events.len(),
+                response.meta.current_page,
+                response.meta.total_pages
+            );
+            for event in response.events.iter().take(5) {
+                println!(
+                    "  - transaction_id={}, code={}, timestamp={}",
+                    event.transaction_id, event.code, event.timestamp
+                );
+            }
+            if response.events.len() > 5 {
+                println!("  ... and {} more events", response.events.len() - 5);
+            }
+        }
+        Err(e) => println!("Failed to list events: {}", e),
+    }
+
+    // Example 7: List events with filters
+    println!("\n--- Example 7: List events with filters ---");
+    let filter_request = ListEventsRequest::new()
+        .with_pagination(PaginationParams::new().with_page(1).with_per_page(10))
+        .with_code("api_calls".to_string());
+
+    match client.list_events(Some(filter_request)).await {
+        Ok(response) => {
+            println!(
+                "Found {} events with code 'api_calls' (total: {})",
+                response.events.len(),
+                response.meta.total_count
+            );
+            for event in &response.events {
+                println!(
+                    "  - transaction_id={}, timestamp={}",
+                    event.transaction_id, event.timestamp
+                );
+            }
+        }
+        Err(e) => println!("Failed to list filtered events: {}", e),
+    }
 
     println!("\n--- All examples completed successfully! ---");
     Ok(())

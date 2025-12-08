@@ -368,10 +368,13 @@ let delete_request = DeleteCouponRequest::new("SUMMER50".to_string());
 
 ### Events
 
-Send and retrieve usage events:
+Send, retrieve, and list usage events:
 
 ```rust
-use lago_types::requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest};
+use lago_types::{
+    models::PaginationParams,
+    requests::event::{CreateEventInput, CreateEventRequest, GetEventRequest, ListEventsRequest},
+};
 use serde_json::json;
 
 // Create a usage event for a customer
@@ -398,6 +401,19 @@ let request = CreateEventRequest::new(event);
 
 // Get a specific event by transaction ID
 let get_request = GetEventRequest::new("transaction_123".to_string());
+
+// List events with filters
+let list_request = ListEventsRequest::new()
+    .with_pagination(PaginationParams::new().with_page(1).with_per_page(50))
+    .with_external_subscription_id("subscription_123".to_string())
+    .with_code("api_calls".to_string())
+    .with_timestamp_range(
+        "2024-01-01T00:00:00Z".to_string(),
+        "2024-01-31T23:59:59Z".to_string(),
+    );
+
+// Convert to query parameters
+let params = list_request.to_query_params();
 ```
 
 ### Credit Notes

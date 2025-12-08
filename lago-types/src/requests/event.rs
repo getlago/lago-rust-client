@@ -1,6 +1,159 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::models::PaginationParams;
+
+/// Request parameters for listing events.
+///
+/// This struct combines pagination parameters and optional filters
+/// to build a comprehensive request for retrieving event lists.
+#[derive(Debug, Clone, Default)]
+pub struct ListEventsRequest {
+    /// Pagination parameters.
+    pub pagination: PaginationParams,
+    /// Filter by external subscription ID.
+    pub external_subscription_id: Option<String>,
+    /// Filter by billable metric code.
+    pub code: Option<String>,
+    /// Requires `external_subscription_id` to be set.
+    /// Filter events by timestamp after the subscription started at datetime.
+    pub timestamp_from_started_at: Option<bool>,
+    /// Filter events by timestamp starting from a specific date (ISO 8601 format).
+    pub timestamp_from: Option<String>,
+    /// Filter events by timestamp up to a specific date (ISO 8601 format).
+    pub timestamp_to: Option<String>,
+}
+
+impl ListEventsRequest {
+    /// Creates a new empty list events request.
+    ///
+    /// # Returns
+    /// A new `ListEventsRequest` instance with default pagination and no filters.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the pagination parameters for the request.
+    ///
+    /// # Arguments
+    /// * `pagination` - The pagination parameters to use
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_pagination(mut self, pagination: PaginationParams) -> Self {
+        self.pagination = pagination;
+        self
+    }
+
+    /// Sets the external subscription ID filter.
+    ///
+    /// # Arguments
+    /// * `external_subscription_id` - The external subscription ID to filter by
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_external_subscription_id(mut self, external_subscription_id: String) -> Self {
+        self.external_subscription_id = Some(external_subscription_id);
+        self
+    }
+
+    /// Sets the billable metric code filter.
+    ///
+    /// # Arguments
+    /// * `code` - The billable metric code to filter by
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_code(mut self, code: String) -> Self {
+        self.code = Some(code);
+        self
+    }
+
+    /// Sets whether to filter events by timestamp after the subscription started at datetime.
+    /// Requires `external_subscription_id` to be set.
+    ///
+    /// # Arguments
+    /// * `timestamp_from_started_at` - Whether to filter from subscription start
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_timestamp_from_started_at(mut self, timestamp_from_started_at: bool) -> Self {
+        self.timestamp_from_started_at = Some(timestamp_from_started_at);
+        self
+    }
+
+    /// Sets the timestamp from filter (events with timestamp >= this date).
+    ///
+    /// # Arguments
+    /// * `timestamp_from` - The start date in ISO 8601 format
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_timestamp_from(mut self, timestamp_from: String) -> Self {
+        self.timestamp_from = Some(timestamp_from);
+        self
+    }
+
+    /// Sets the timestamp to filter (events with timestamp <= this date).
+    ///
+    /// # Arguments
+    /// * `timestamp_to` - The end date in ISO 8601 format
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_timestamp_to(mut self, timestamp_to: String) -> Self {
+        self.timestamp_to = Some(timestamp_to);
+        self
+    }
+
+    /// Sets the timestamp range filter.
+    ///
+    /// # Arguments
+    /// * `from` - The start date in ISO 8601 format
+    /// * `to` - The end date in ISO 8601 format
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_timestamp_range(mut self, from: String, to: String) -> Self {
+        self.timestamp_from = Some(from);
+        self.timestamp_to = Some(to);
+        self
+    }
+
+    /// Converts the request parameters into HTTP query parameters.
+    ///
+    /// # Returns
+    /// A vector of query parameter tuples containing both pagination and filter criteria.
+    pub fn to_query_params(&self) -> Vec<(&str, String)> {
+        let mut params = self.pagination.to_query_params();
+
+        if let Some(external_subscription_id) = &self.external_subscription_id {
+            params.push(("external_subscription_id", external_subscription_id.clone()));
+        }
+
+        if let Some(code) = &self.code {
+            params.push(("code", code.clone()));
+        }
+
+        if let Some(timestamp_from_started_at) = &self.timestamp_from_started_at {
+            params.push((
+                "timestamp_from_started_at",
+                timestamp_from_started_at.to_string(),
+            ));
+        }
+
+        if let Some(timestamp_from) = &self.timestamp_from {
+            params.push(("timestamp_from", timestamp_from.clone()));
+        }
+
+        if let Some(timestamp_to) = &self.timestamp_to {
+            params.push(("timestamp_to", timestamp_to.clone()));
+        }
+
+        params
+    }
+}
+
 /// Request to retrieve a specific event by transaction ID.
 #[derive(Debug, Clone)]
 pub struct GetEventRequest {

@@ -22,11 +22,11 @@ pub struct Event {
     /// Lago ID of the linked subscription (may be null)
     pub lago_subscription_id: Option<Uuid>,
     /// External subscription reference
-    pub external_subscription_id: String,
+    pub external_subscription_id: Option<String>,
     /// Record creation timestamp
     pub created_at: DateTime<Utc>,
     /// Precise amount calculation in cents
-    pub precise_total_amount_cents: Option<i64>,
+    pub precise_total_amount_cents: Option<String>,
     /// Custom event metadata/properties
     pub properties: Option<Value>,
 }
