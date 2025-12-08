@@ -1,6 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::Event;
+use crate::models::{Event, PaginationMeta};
+
+/// Response for listing events.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ListEventsResponse {
+    /// The list of events.
+    pub events: Vec<Event>,
+    /// Pagination metadata.
+    pub meta: PaginationMeta,
+}
 
 /// Response for retrieving a single event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
