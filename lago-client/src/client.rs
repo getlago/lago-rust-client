@@ -141,6 +141,10 @@ impl LagoClient {
 
         if status.is_success() {
             let text = response.text().await.map_err(LagoError::Http)?;
+            // Handle empty responses (e.g., 200 OK with no body)
+            if text.is_empty() {
+                return serde_json::from_str("{}").map_err(LagoError::Serialization);
+            }
             serde_json::from_str(&text).map_err(LagoError::Serialization)
         } else {
             let error_text = response
@@ -615,5 +619,28 @@ mod tests {
             LagoError::Http(_) => {}
             other => panic!("Expected HTTP error, got: {other:?}"),
         }
+    }
+
+    #[tokio::test]
+    async fn test_empty_response_body() {
+        // Test that empty response bodies are handled correctly (e.g., retry_payment returns 200 with no body)
+        #[derive(Debug, Default, Deserialize)]
+        struct EmptyResponse {}
+
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("POST", "/test")
+            .with_status(200)
+            .with_body("")
+            .create_async()
+            .await;
+
+        let client = create_test_client(&server.url());
+        let url = format!("{}/test", server.url());
+
+        let result: Result<EmptyResponse> = client.make_request("POST", &url, None::<&()>).await;
+
+        assert!(result.is_ok());
+        mock.assert_async().await;
     }
 }
