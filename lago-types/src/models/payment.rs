@@ -92,15 +92,21 @@ pub enum PaymentType {
 #[strum(serialize_all = "snake_case")]
 pub enum PaymentProviderType {
     /// Adyen payment provider.
+    #[serde(alias = "PaymentProviders::AdyenProvider")]
     Adyen,
     /// Cashfree payment provider.
+    #[serde(alias = "PaymentProviders::CashfreeProvider")]
     Cashfree,
     /// GoCardless payment provider.
+    #[serde(alias = "PaymentProviders::GocardlessProvider")]
     Gocardless,
     /// Stripe payment provider.
+    #[serde(alias = "PaymentProviders::StripeProvider")]
     Stripe,
     /// Flutterwave payment provider.
+    #[serde(alias = "PaymentProviders::FlutterwaveProvider")]
     Flutterwave,
     /// MoneyHash payment provider.
+    #[serde(alias = "PaymentProviders::MoneyhashProvider")]
     Moneyhash,
 }
