@@ -73,7 +73,6 @@ pub struct RetryInvoiceResponse {
 /// Response for retrying an invoice payment.
 ///
 /// This struct represents the API response for the retry payment endpoint.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RetryInvoicePaymentResponse {
-    pub invoice: Invoice,
-}
+/// Note: The Lago API returns an empty body (HTTP 200 with no content) for this endpoint.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RetryInvoicePaymentResponse {}
