@@ -178,14 +178,14 @@ pub enum InvoicePaymentStatus {
 /// that this invoice covers.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InvoiceBillingPeriod {
-    pub lago_subscription_id: Uuid,
-    pub external_subscription_id: String,
+    pub lago_subscription_id: Option<Uuid>,
+    pub external_subscription_id: Option<String>,
     pub subscription_from_datetime: DateTime<Utc>,
     pub subscription_to_datetime: DateTime<Utc>,
     pub charges_from_datetime: DateTime<Utc>,
     pub charges_to_datetime: DateTime<Utc>,
     pub invoicing_reason: InvoiceInvoicingReason,
-    pub lago_plan_id: Uuid,
+    pub lago_plan_id: Option<Uuid>,
 }
 
 /// Defines the reason for invoice generation.
@@ -219,11 +219,11 @@ pub struct InvoiceAppliedTax {
     pub lago_invoice_id: Uuid,
     pub fee_amount_cents: Option<i64>,
     pub lago_id: Uuid,
-    pub lago_tax_id: Uuid,
+    pub lago_tax_id: Option<Uuid>,
     pub tax_name: String,
     pub tax_code: String,
     pub tax_rate: f32,
-    pub tax_description: String,
+    pub tax_description: Option<String>,
     pub amount_cents: i64,
     pub amount_currency: String,
     pub created_at: DateTime<Utc>,
