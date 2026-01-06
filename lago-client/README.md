@@ -116,7 +116,7 @@ use lago_types::requests::invoice::{
     ListInvoicesRequest, GetInvoiceRequest, CreateInvoiceInput, CreateInvoiceFeeInput,
     CreateInvoiceRequest, UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest,
     ListCustomerInvoicesRequest, RefreshInvoiceRequest, DownloadInvoiceRequest,
-    RetryInvoiceRequest, RetryInvoicePaymentRequest,
+    RetryInvoiceRequest, RetryInvoicePaymentRequest, VoidInvoiceRequest,
 };
 
 // List invoices with optional filters
@@ -170,6 +170,10 @@ let retried = client.retry_invoice(request).await?;
 // Retry a failed invoice payment
 let request = RetryInvoicePaymentRequest::new("invoice-lago-id".to_string());
 let retried = client.retry_invoice_payment(request).await?;
+
+// Void a finalized invoice
+let request = VoidInvoiceRequest::new("invoice-lago-id".to_string());
+let voided = client.void_invoice(request).await?;
 ```
 
 ### Invoice Preview
