@@ -800,3 +800,26 @@ impl RetryInvoicePaymentRequest {
         Self { lago_id }
     }
 }
+
+/// Request for voiding a finalized invoice.
+///
+/// This voids a finalized invoice, changing its status to "voided".
+/// Only finalized invoices can be voided.
+#[derive(Debug, Clone)]
+pub struct VoidInvoiceRequest {
+    /// The Lago ID of the invoice to void.
+    pub lago_id: String,
+}
+
+impl VoidInvoiceRequest {
+    /// Creates a new void invoice request.
+    ///
+    /// # Arguments
+    /// * `lago_id` - The Lago ID of the invoice to void
+    ///
+    /// # Returns
+    /// A new `VoidInvoiceRequest` instance
+    pub fn new(lago_id: String) -> Self {
+        Self { lago_id }
+    }
+}
