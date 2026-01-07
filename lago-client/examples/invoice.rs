@@ -1,7 +1,7 @@
 use lago_client::LagoClient;
 use lago_types::requests::invoice::{
     DownloadInvoiceRequest, GetInvoiceRequest, ListCustomerInvoicesRequest, ListInvoicesRequest,
-    UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest,
+    UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest, VoidInvoiceRequest,
 };
 
 #[tokio::main]
@@ -62,6 +62,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             println!("\nInvoice PDF not yet available");
         }
+
+        // Example 6: Void a finalized invoice (commented out to avoid modifying data)
+        // Only finalized invoices can be voided - this changes the status to "voided"
+        // let void_request = VoidInvoiceRequest::new(invoice_id.to_string());
+        // let voided = client.void_invoice(void_request).await?;
+        // println!("\nVoided invoice: {} - Status: {:?}", voided.invoice.number, voided.invoice.status);
+        println!("\nExample 6: Void invoice (skipped - uncomment to test)");
+        println!("  Usage: VoidInvoiceRequest::new(invoice_id)");
     } else {
         println!("No invoices found, skipping detailed examples");
     }

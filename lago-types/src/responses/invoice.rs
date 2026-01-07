@@ -76,3 +76,11 @@ pub struct RetryInvoiceResponse {
 /// Note: The Lago API returns an empty body (HTTP 200 with no content) for this endpoint.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RetryInvoicePaymentResponse {}
+
+/// Response for voiding an invoice.
+///
+/// This struct represents the API response for the void invoice endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VoidInvoiceResponse {
+    pub invoice: Invoice,
+}

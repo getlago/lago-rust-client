@@ -101,7 +101,8 @@ use lago_types::requests::invoice::{
     // List types
     ListCustomerInvoicesRequest,
     // Action types
-    RefreshInvoiceRequest, DownloadInvoiceRequest, RetryInvoiceRequest, RetryInvoicePaymentRequest,
+    RefreshInvoiceRequest, DownloadInvoiceRequest, RetryInvoiceRequest,
+    RetryInvoicePaymentRequest, VoidInvoiceRequest,
 };
 
 // Create a one-off invoice
@@ -142,6 +143,9 @@ let request = RetryInvoiceRequest::new("invoice-lago-id".to_string());
 
 // Retry failed payment
 let request = RetryInvoicePaymentRequest::new("invoice-lago-id".to_string());
+
+// Void a finalized invoice
+let request = VoidInvoiceRequest::new("invoice-lago-id".to_string());
 ```
 
 ### Invoice Preview

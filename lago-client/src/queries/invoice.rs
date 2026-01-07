@@ -3,12 +3,12 @@ use lago_types::{
     requests::invoice::{
         CreateInvoiceRequest, DownloadInvoiceRequest, GetInvoiceRequest, InvoicePreviewRequest,
         ListCustomerInvoicesRequest, ListInvoicesRequest, RefreshInvoiceRequest,
-        RetryInvoicePaymentRequest, RetryInvoiceRequest, UpdateInvoiceRequest,
+        RetryInvoicePaymentRequest, RetryInvoiceRequest, UpdateInvoiceRequest, VoidInvoiceRequest,
     },
     responses::invoice::{
         CreateInvoiceResponse, DownloadInvoiceResponse, GetInvoiceResponse, InvoicePreviewResponse,
         ListInvoicesResponse, RefreshInvoiceResponse, RetryInvoicePaymentResponse,
-        RetryInvoiceResponse, UpdateInvoiceResponse,
+        RetryInvoiceResponse, UpdateInvoiceResponse, VoidInvoiceResponse,
     },
 };
 use url::Url;
@@ -233,6 +233,22 @@ impl LagoClient {
             region.endpoint(),
             request.lago_id
         );
+        self.make_request("POST", &url, None::<&()>).await
+    }
+
+    /// Voids a finalized invoice
+    ///
+    /// This endpoint voids a finalized invoice, changing its status to "voided".
+    /// Only finalized invoices can be voided.
+    ///
+    /// # Arguments
+    /// * `request` - The request containing the invoice ID to void
+    ///
+    /// # Returns
+    /// A `Result` containing the voided invoice or an error
+    pub async fn void_invoice(&self, request: VoidInvoiceRequest) -> Result<VoidInvoiceResponse> {
+        let region = self.config.region()?;
+        let url = format!("{}/invoices/{}/void", region.endpoint(), request.lago_id);
         self.make_request("POST", &url, None::<&()>).await
     }
 }
