@@ -9,6 +9,8 @@ use crate::models::{CreditNoteReason, CreditNoteRefundStatus, PaginationParams};
 pub struct ListCreditNotesRequest {
     pub pagination: PaginationParams,
     pub filters: CreditNoteFilter,
+    /// Search by id, number, customer name, external_id or email.
+    pub search_term: Option<String>,
 }
 
 impl ListCreditNotesRequest {
@@ -17,6 +19,7 @@ impl ListCreditNotesRequest {
         Self {
             pagination: PaginationParams::default(),
             filters: CreditNoteFilter::default(),
+            search_term: None,
         }
     }
 
@@ -32,10 +35,23 @@ impl ListCreditNotesRequest {
         self
     }
 
+    /// Sets the search term for the request.
+    ///
+    /// Search by id, number, customer name, external_id or email.
+    pub fn with_search_term(mut self, term: String) -> Self {
+        self.search_term = Some(term);
+        self
+    }
+
     /// Converts the request parameters into HTTP query parameters.
     pub fn to_query_params(&self) -> Vec<(&str, String)> {
         let mut params = self.pagination.to_query_params();
         params.extend(self.filters.to_query_params());
+
+        if let Some(ref term) = self.search_term {
+            params.push(("search_term", term.clone()));
+        }
+
         params
     }
 }

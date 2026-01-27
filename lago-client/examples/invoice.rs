@@ -1,7 +1,7 @@
 use lago_client::LagoClient;
 use lago_types::requests::invoice::{
     DownloadInvoiceRequest, GetInvoiceRequest, ListCustomerInvoicesRequest, ListInvoicesRequest,
-    UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest, VoidInvoiceRequest,
+    UpdateInvoiceInput, UpdateInvoiceMetadataInput, UpdateInvoiceRequest,
 };
 
 #[tokio::main]
@@ -12,6 +12,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let list_request = ListInvoicesRequest::new();
     let invoices = client.list_invoices(Some(list_request)).await?;
     println!("Found {} invoices", invoices.invoices.len());
+
+    // Example 1b: Search invoices by number, customer name, or email
+    let search_request = ListInvoicesRequest::new().with_search_term("LAR-F878-202501".to_string());
+    let search_results = client.list_invoices(Some(search_request)).await?;
+    println!(
+        "Found {} invoices matching search term",
+        search_results.invoices.len()
+    );
 
     for invoice in &invoices.invoices {
         println!(
