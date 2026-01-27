@@ -9,7 +9,6 @@ pub struct CreditNoteFilter {
     pub external_customer_id: Option<String>,
     pub issuing_date_from: Option<String>,
     pub issuing_date_to: Option<String>,
-    pub search_term: Option<String>,
     pub currency: Option<String>,
     pub reason: Option<CreditNoteReason>,
     pub credit_status: Option<CreditNoteCreditStatus>,
@@ -47,12 +46,6 @@ impl CreditNoteFilter {
     /// Filter by issuing date to.
     pub fn with_issuing_date_to(mut self, to: String) -> Self {
         self.issuing_date_to = Some(to);
-        self
-    }
-
-    /// Search by id, number, customer name, external_id or email.
-    pub fn with_search_term(mut self, term: String) -> Self {
-        self.search_term = Some(term);
         self
     }
 
@@ -120,10 +113,6 @@ impl ListFilters for CreditNoteFilter {
 
         if let Some(ref to) = self.issuing_date_to {
             params.push(("issuing_date_to", to.clone()));
-        }
-
-        if let Some(ref term) = self.search_term {
-            params.push(("search_term", term.clone()));
         }
 
         if let Some(ref currency) = self.currency {

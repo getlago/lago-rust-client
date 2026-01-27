@@ -12,6 +12,8 @@ use crate::filters::{common::ListFilters, invoice::InvoiceFilters};
 pub struct ListInvoicesRequest {
     pub pagination: PaginationParams,
     pub filters: InvoiceFilters,
+    /// Search by id, number, customer name, external_id or email.
+    pub search_term: Option<String>,
 }
 
 impl ListInvoicesRequest {
@@ -23,6 +25,7 @@ impl ListInvoicesRequest {
         Self {
             pagination: PaginationParams::default(),
             filters: InvoiceFilters::default(),
+            search_term: None,
         }
     }
 
@@ -50,6 +53,20 @@ impl ListInvoicesRequest {
         self
     }
 
+    /// Sets the search term for the request.
+    ///
+    /// Search by id, number, customer name, external_id or email.
+    ///
+    /// # Arguments
+    /// * `term` - The search term
+    ///
+    /// # Returns
+    /// The modified request instance for method chaining.
+    pub fn with_search_term(mut self, term: String) -> Self {
+        self.search_term = Some(term);
+        self
+    }
+
     /// Converts the request parameters into HTTP query parameters.
     ///
     /// # Returns
@@ -57,6 +74,11 @@ impl ListInvoicesRequest {
     pub fn to_query_params(&self) -> Vec<(&str, String)> {
         let mut params = self.pagination.to_query_params();
         params.extend(self.filters.to_query_params());
+
+        if let Some(ref term) = self.search_term {
+            params.push(("search_term", term.clone()));
+        }
+
         params
     }
 }
@@ -675,6 +697,8 @@ pub struct ListCustomerInvoicesRequest {
     pub pagination: PaginationParams,
     /// Invoice filters.
     pub filters: InvoiceFilters,
+    /// Search by id, number, customer name, external_id or email.
+    pub search_term: Option<String>,
 }
 
 impl ListCustomerInvoicesRequest {
@@ -690,6 +714,7 @@ impl ListCustomerInvoicesRequest {
             external_customer_id,
             pagination: PaginationParams::default(),
             filters: InvoiceFilters::default(),
+            search_term: None,
         }
     }
 
@@ -705,10 +730,23 @@ impl ListCustomerInvoicesRequest {
         self
     }
 
+    /// Sets the search term for the request.
+    ///
+    /// Search by id, number, customer name, external_id or email.
+    pub fn with_search_term(mut self, term: String) -> Self {
+        self.search_term = Some(term);
+        self
+    }
+
     /// Converts the request parameters into HTTP query parameters.
     pub fn to_query_params(&self) -> Vec<(&str, String)> {
         let mut params = self.pagination.to_query_params();
         params.extend(self.filters.to_query_params());
+
+        if let Some(ref term) = self.search_term {
+            params.push(("search_term", term.clone()));
+        }
+
         params
     }
 }

@@ -16,7 +16,6 @@ pub struct InvoiceFilters {
     pub status: Option<InvoiceStatus>,
     pub payment_status: Option<InvoicePaymentStatus>,
     pub invoice_type: Option<InvoiceType>,
-    pub search_term: Option<String>,
 }
 
 impl InvoiceFilters {
@@ -112,18 +111,6 @@ impl InvoiceFilters {
         self.invoice_type = Some(invoice_type);
         self
     }
-
-    /// Search by id, number, customer name, external_id or email.
-    ///
-    /// # Arguments
-    /// * `term` - The search term to filter by
-    ///
-    /// # Returns
-    /// The modified filter instance for method chaining.
-    pub fn with_search_term(mut self, term: String) -> Self {
-        self.search_term = Some(term);
-        self
-    }
 }
 
 impl ListFilters for InvoiceFilters {
@@ -161,10 +148,6 @@ impl ListFilters for InvoiceFilters {
 
         if let Some(invoice_type) = &self.invoice_type {
             params.push(("invoice_type", format!("{invoice_type:?}").to_lowercase()));
-        }
-
-        if let Some(ref term) = self.search_term {
-            params.push(("search_term", term.clone()));
         }
 
         params

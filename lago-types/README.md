@@ -83,10 +83,7 @@ let request = ListInvoicesRequest::new()
 
 // Search invoices by number, customer name, external_id, or email
 let request = ListInvoicesRequest::new()
-    .with_filters(
-        InvoiceFilters::new()
-            .with_search_term("INV-2024-001".to_string())
-    );
+    .with_search_term("INV-2024-001".to_string());
 
 // Convert to query parameters
 let params = request.to_query_params();
