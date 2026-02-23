@@ -10,4 +10,6 @@ pub mod event;
 pub mod invoice;
 pub mod payment;
 pub mod plan;
+pub mod plan_charge;
 pub mod subscription;
+pub mod subscription_charge;
