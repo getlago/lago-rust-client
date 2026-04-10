@@ -1,9 +1,9 @@
 use reqwest::{Client as HttpClient, Response};
 use serde::de::DeserializeOwned;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tokio::time::sleep;
 
-use lago_types::{error::LagoError, error::Result};
+use lago_types::error::{LagoError, RateLimitInfo, Result};
 
 use crate::{Config, RetryMode};
 
@@ -54,6 +54,10 @@ impl LagoClient {
     ///
     /// This method handles authentication, request serialization, response deserialization,
     /// error handling, and automatic retries based on the configured retry policy.
+    ///
+    /// When a rate limit error (429) is encountered, the client will use the
+    /// `x-ratelimit-reset` header value as the wait time if available, falling back
+    /// to exponential backoff otherwise.
     ///
     /// # Arguments
     /// * `method` - The HTTP method (GET, POST, PUT, DELETE)
@@ -118,7 +122,7 @@ impl LagoClient {
                     }
 
                     attempt += 1;
-                    let delay = self.config.retry_config().delay_for_attempt(attempt);
+                    let delay = self.get_retry_delay(&e, attempt);
                     sleep(delay).await;
                     continue;
                 }
@@ -126,10 +130,77 @@ impl LagoClient {
         }
     }
 
+    /// Determines the appropriate delay before the next retry attempt
+    ///
+    /// For rate limit errors (429), uses the `x-ratelimit-reset` header value
+    /// if available, otherwise falls back to exponential backoff. For other errors,
+    /// always uses exponential backoff.
+    ///
+    /// # Arguments
+    /// * `error` - The error that occurred during the request
+    /// * `attempt` - The current attempt number (1-based)
+    ///
+    /// # Returns
+    /// The duration to wait before retrying
+    fn get_retry_delay(&self, error: &LagoError, attempt: u32) -> Duration {
+        match error {
+            LagoError::RateLimit { info } => {
+                if let Some(reset_secs) = info.reset {
+                    // Use the server's reset time if available
+                    Duration::from_secs(reset_secs)
+                } else {
+                    // Fall back to exponential backoff if header is missing
+                    self.config.retry_config().delay_for_attempt(attempt)
+                }
+            }
+            _ => {
+                // Use exponential backoff for all other errors
+                self.config.retry_config().delay_for_attempt(attempt)
+            }
+        }
+    }
+
+    /// Extracts rate limit information from response headers
+    ///
+    /// Parses the x-ratelimit-* headers that are present on every response
+    /// from the Lago API to provide rate limit context.
+    ///
+    /// # Arguments
+    /// * `response` - The HTTP response from the request
+    ///
+    /// # Returns
+    /// A `RateLimitInfo` struct with parsed header values (all fields optional)
+    fn parse_rate_limit_headers(&self, response: &Response) -> RateLimitInfo {
+        let limit = response
+            .headers()
+            .get("x-ratelimit-limit")
+            .and_then(|h| h.to_str().ok())
+            .and_then(|s| s.parse::<u32>().ok());
+
+        let remaining = response
+            .headers()
+            .get("x-ratelimit-remaining")
+            .and_then(|h| h.to_str().ok())
+            .and_then(|s| s.parse::<u32>().ok());
+
+        let reset = response
+            .headers()
+            .get("x-ratelimit-reset")
+            .and_then(|h| h.to_str().ok())
+            .and_then(|s| s.parse::<u64>().ok());
+
+        RateLimitInfo {
+            limit,
+            remaining,
+            reset,
+        }
+    }
+
     /// Processes the HTTP response and converts it to the expected type
     ///
     /// This method handles different HTTP status codes and converts them to appropriate
-    /// error types for the client to handle.
+    /// error types for the client to handle. It also extracts rate limit information
+    /// from response headers to provide context to callers.
     ///
     /// # Arguments
     /// * `response` - The HTTP response from the request
@@ -158,7 +229,10 @@ impl LagoClient {
                     status: status.as_u16(),
                     message: error_text,
                 }),
-                429 => Err(LagoError::RateLimit),
+                429 => {
+                    let info = self.parse_rate_limit_headers(&response);
+                    Err(LagoError::RateLimit { info })
+                }
                 _ => Err(LagoError::Api {
                     status: status.as_u16(),
                     message: error_text,
@@ -201,7 +275,7 @@ impl LagoClient {
 mod tests {
     use super::*;
     use crate::{Config, Credentials, Region, RetryConfig, RetryMode};
-    use lago_types::error::LagoError;
+    use lago_types::error::{LagoError, RateLimitInfo};
     use mockito::Server;
     use serde::{Deserialize, Serialize};
     use serde_json::json;
@@ -424,6 +498,9 @@ mod tests {
         let mock = server
             .mock("GET", "/test")
             .with_status(429)
+            .with_header("x-ratelimit-limit", "100")
+            .with_header("x-ratelimit-remaining", "0")
+            .with_header("x-ratelimit-reset", "60")
             .with_body("Rate Limited")
             .create_async()
             .await;
@@ -436,7 +513,11 @@ mod tests {
         assert!(result.is_err());
 
         match result.unwrap_err() {
-            LagoError::RateLimit => {}
+            LagoError::RateLimit { info } => {
+                assert_eq!(info.limit, Some(100));
+                assert_eq!(info.remaining, Some(0));
+                assert_eq!(info.reset, Some(60));
+            }
             _ => panic!("Expected RateLimit error"),
         }
 
@@ -575,7 +656,13 @@ mod tests {
     async fn test_should_retry_logic() {
         let client = create_retry_client("http://localhost:8080", 3);
 
-        let rate_limit_error = LagoError::RateLimit;
+        let rate_limit_error = LagoError::RateLimit {
+            info: RateLimitInfo {
+                limit: Some(100),
+                remaining: Some(0),
+                reset: Some(60),
+            },
+        };
         assert!(client.should_retry(&rate_limit_error, 1));
 
         let server_error = LagoError::Api {
@@ -642,5 +729,125 @@ mod tests {
 
         assert!(result.is_ok());
         mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_rate_limit_error_with_headers() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(429)
+            .with_header("x-ratelimit-limit", "100")
+            .with_header("x-ratelimit-remaining", "0")
+            .with_header("x-ratelimit-reset", "120")
+            .with_body("Rate Limited")
+            .create_async()
+            .await;
+
+        let client = create_test_client(&server.url());
+        let url = format!("{}/test", server.url());
+
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
+
+        assert!(result.is_err());
+
+        match result.unwrap_err() {
+            LagoError::RateLimit { info } => {
+                assert_eq!(info.limit, Some(100), "Expected limit to be parsed");
+                assert_eq!(info.remaining, Some(0), "Expected remaining to be parsed");
+                assert_eq!(info.reset, Some(120), "Expected reset seconds to be parsed");
+            }
+            other => panic!("Expected RateLimit error, got: {other:?}"),
+        }
+
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_rate_limit_error_without_headers() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(429)
+            .with_body("Rate Limited")
+            .create_async()
+            .await;
+
+        let client = create_test_client(&server.url());
+        let url = format!("{}/test", server.url());
+
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
+
+        assert!(result.is_err());
+
+        match result.unwrap_err() {
+            LagoError::RateLimit { info } => {
+                assert!(info.limit.is_none(), "Expected limit to be None");
+                assert!(info.remaining.is_none(), "Expected remaining to be None");
+                assert!(info.reset.is_none(), "Expected reset to be None");
+            }
+            other => panic!("Expected RateLimit error, got: {other:?}"),
+        }
+
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_get_retry_delay_uses_rate_limit_reset() {
+        let client = create_retry_client("http://localhost:8080", 3);
+
+        let rate_limit_error = LagoError::RateLimit {
+            info: RateLimitInfo {
+                limit: Some(100),
+                remaining: Some(0),
+                reset: Some(45),
+            },
+        };
+
+        let delay = client.get_retry_delay(&rate_limit_error, 1);
+        assert_eq!(
+            delay,
+            Duration::from_secs(45),
+            "Should use reset time from rate limit header"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_retry_delay_falls_back_to_exponential_backoff() {
+        let client = create_retry_client("http://localhost:8080", 3);
+
+        let rate_limit_error = LagoError::RateLimit {
+            info: RateLimitInfo {
+                limit: Some(100),
+                remaining: Some(0),
+                reset: None,
+            },
+        };
+
+        let delay = client.get_retry_delay(&rate_limit_error, 1);
+        // With initial_delay of 100ms and multiplier of 2.0, attempt 1 should give 200ms
+        assert_eq!(
+            delay,
+            Duration::from_millis(200),
+            "Should fall back to exponential backoff when reset header is missing"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_retry_delay_for_non_rate_limit_errors() {
+        let client = create_retry_client("http://localhost:8080", 3);
+
+        let server_error = LagoError::Api {
+            status: 500,
+            message: "Server Error".to_string(),
+        };
+
+        let delay = client.get_retry_delay(&server_error, 2);
+        // With initial_delay of 100ms and multiplier of 2.0, attempt 2 should give 400ms
+        assert_eq!(
+            delay,
+            Duration::from_millis(400),
+            "Should use exponential backoff for non-rate-limit errors"
+        );
     }
 }
