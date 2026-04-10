@@ -218,6 +218,13 @@ impl LagoClient {
             }
             serde_json::from_str(&text).map_err(LagoError::Serialization)
         } else {
+            // Parse rate limit headers before consuming the response body
+            let rate_limit_info = if status.as_u16() == 429 {
+                Some(self.parse_rate_limit_headers(&response))
+            } else {
+                None
+            };
+
             let error_text = response
                 .text()
                 .await
@@ -230,8 +237,7 @@ impl LagoClient {
                     message: error_text,
                 }),
                 429 => {
-                    let info = self.parse_rate_limit_headers(&response);
-                    Err(LagoError::RateLimit { info })
+                    Err(LagoError::RateLimit { info: rate_limit_info.unwrap() })
                 }
                 _ => Err(LagoError::Api {
                     status: status.as_u16(),
