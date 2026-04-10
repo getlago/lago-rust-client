@@ -264,7 +264,7 @@ impl LagoClient {
 
         match error {
             LagoError::Http(_) => true,
-            LagoError::RateLimit => true,
+            LagoError::RateLimit { .. } => true,
             LagoError::Api { status, .. } => *status >= 500,
             _ => false,
         }
