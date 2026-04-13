@@ -168,19 +168,25 @@ impl LagoClient {
     /// For rate limit errors (429), uses the `x-ratelimit-reset` header value
     /// if available, otherwise falls back to exponential backoff. For other errors,
     /// always uses exponential backoff.
+    /// Maximum delay before a retry attempt (20 seconds).
+    const MAX_RETRY_DELAY: Duration = Duration::from_secs(20);
+
     fn get_retry_delay(
         &self,
         rate_limit_info: Option<&RateLimitInfo>,
         error: &LagoError,
         attempt: u32,
     ) -> Duration {
-        if let LagoError::RateLimit = error
+        let delay = if let LagoError::RateLimit = error
             && let Some(info) = rate_limit_info
             && let Some(reset_secs) = info.reset
         {
-            return Duration::from_secs(reset_secs);
-        }
-        self.config.retry_config().delay_for_attempt(attempt)
+            Duration::from_secs(reset_secs)
+        } else {
+            self.config.retry_config().delay_for_attempt(attempt)
+        };
+
+        delay.min(Self::MAX_RETRY_DELAY)
     }
 
     /// Extracts rate limit information from response headers
@@ -773,14 +779,32 @@ mod tests {
         let info = RateLimitInfo {
             limit: Some(100),
             remaining: Some(0),
-            reset: Some(45),
+            reset: Some(10),
         };
 
         let delay = client.get_retry_delay(Some(&info), &LagoError::RateLimit, 1);
         assert_eq!(
             delay,
-            Duration::from_secs(45),
+            Duration::from_secs(10),
             "Should use reset time from rate limit header"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_retry_delay_caps_at_max() {
+        let client = create_retry_client("http://localhost:8080", 3);
+
+        let info = RateLimitInfo {
+            limit: Some(100),
+            remaining: Some(0),
+            reset: Some(120),
+        };
+
+        let delay = client.get_retry_delay(Some(&info), &LagoError::RateLimit, 1);
+        assert_eq!(
+            delay,
+            Duration::from_secs(20),
+            "Should cap retry delay at 20 seconds"
         );
     }
 
