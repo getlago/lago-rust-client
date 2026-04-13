@@ -155,8 +155,7 @@ impl LagoClient {
                     }
 
                     attempt += 1;
-                    let delay =
-                        self.get_retry_delay(rate_limit_info.as_ref(), &e, attempt);
+                    let delay = self.get_retry_delay(rate_limit_info.as_ref(), &e, attempt);
                     sleep(delay).await;
                     continue;
                 }
