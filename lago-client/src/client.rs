@@ -174,12 +174,11 @@ impl LagoClient {
         error: &LagoError,
         attempt: u32,
     ) -> Duration {
-        if let LagoError::RateLimit = error {
-            if let Some(info) = rate_limit_info {
-                if let Some(reset_secs) = info.reset {
-                    return Duration::from_secs(reset_secs);
-                }
-            }
+        if let LagoError::RateLimit = error
+            && let Some(info) = rate_limit_info
+            && let Some(reset_secs) = info.reset
+        {
+            return Duration::from_secs(reset_secs);
         }
         self.config.retry_config().delay_for_attempt(attempt)
     }
