@@ -29,3 +29,12 @@ pub struct GetBillableMetricResponse {
 pub struct CreateBillableMetricResponse {
     pub billable_metric: BillableMetric,
 }
+
+/// Response for updating a billable metric.
+///
+/// This struct represents the response returned when successfully updating
+/// an existing billable metric.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateBillableMetricResponse {
+    pub billable_metric: BillableMetric,
+}
