@@ -4,7 +4,7 @@ use lago_types::{
     models::{BillableMetricAggregationType, BillableMetricFilter, BillableMetricRoundingFunction},
     requests::billable_metric::{
         CreateBillableMetricInput, CreateBillableMetricRequest, GetBillableMetricRequest,
-        ListBillableMetricsRequest,
+        ListBillableMetricsRequest, UpdateBillableMetricInput, UpdateBillableMetricRequest,
     },
 };
 
@@ -56,6 +56,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let get_request = GetBillableMetricRequest::new("storage_gb".to_string());
     let metric = client.get_billable_metric(get_request).await?;
     println!("Retrieved metric: {}", metric.billable_metric.name);
+
+    // Example 5: Update a billable metric
+    let update_input = UpdateBillableMetricInput::new()
+        .with_name("Storage Usage (updated)".to_string())
+        .with_description("Updated description for storage usage".to_string());
+
+    let update_request = UpdateBillableMetricRequest::new("storage_gb".to_string(), update_input);
+    let updated_metric = client.update_billable_metric(update_request).await?;
+    println!(
+        "Updated billable metric: {} — {:?}",
+        updated_metric.billable_metric.name, updated_metric.billable_metric.description
+    );
 
     Ok(())
 }
