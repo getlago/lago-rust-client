@@ -257,3 +257,155 @@ impl CreateBillableMetricRequest {
         Self { billable_metric }
     }
 }
+
+/// Input parameters for updating a billable metric.
+///
+/// All fields are optional — only the fields that are set will be sent in the
+/// request body, allowing partial updates without clearing unset fields.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateBillableMetricInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub aggregation_type: Option<BillableMetricAggregationType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recurring: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rounding_function: Option<BillableMetricRoundingFunction>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rounding_precision: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expression: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub weighted_interval: Option<BillableMetricWeightedInterval>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filters: Option<Vec<BillableMetricFilterModel>>,
+}
+
+impl UpdateBillableMetricInput {
+    /// Creates a new empty update billable metric input.
+    pub fn new() -> Self {
+        Self {
+            name: None,
+            code: None,
+            description: None,
+            aggregation_type: None,
+            recurring: None,
+            rounding_function: None,
+            rounding_precision: None,
+            expression: None,
+            field_name: None,
+            weighted_interval: None,
+            filters: None,
+        }
+    }
+
+    /// Sets the name.
+    pub fn with_name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
+    }
+
+    /// Sets the code.
+    pub fn with_code(mut self, code: String) -> Self {
+        self.code = Some(code);
+        self
+    }
+
+    /// Sets the description.
+    pub fn with_description(mut self, description: String) -> Self {
+        self.description = Some(description);
+        self
+    }
+
+    /// Sets the aggregation type.
+    pub fn with_aggregation_type(
+        mut self,
+        aggregation_type: BillableMetricAggregationType,
+    ) -> Self {
+        self.aggregation_type = Some(aggregation_type);
+        self
+    }
+
+    /// Sets whether the billable metric is recurring.
+    pub fn with_recurring(mut self, recurring: bool) -> Self {
+        self.recurring = Some(recurring);
+        self
+    }
+
+    /// Sets the rounding function.
+    pub fn with_rounding_function(
+        mut self,
+        rounding_function: BillableMetricRoundingFunction,
+    ) -> Self {
+        self.rounding_function = Some(rounding_function);
+        self
+    }
+
+    /// Sets the rounding precision.
+    pub fn with_rounding_precision(mut self, precision: i32) -> Self {
+        self.rounding_precision = Some(precision);
+        self
+    }
+
+    /// Sets the expression.
+    pub fn with_expression(mut self, expression: String) -> Self {
+        self.expression = Some(expression);
+        self
+    }
+
+    /// Sets the field name.
+    pub fn with_field_name(mut self, field_name: String) -> Self {
+        self.field_name = Some(field_name);
+        self
+    }
+
+    /// Sets the weighted interval.
+    pub fn with_weighted_interval(mut self, interval: BillableMetricWeightedInterval) -> Self {
+        self.weighted_interval = Some(interval);
+        self
+    }
+
+    /// Sets the filters.
+    pub fn with_filters(mut self, filters: Vec<BillableMetricFilterModel>) -> Self {
+        self.filters = Some(filters);
+        self
+    }
+}
+
+impl Default for UpdateBillableMetricInput {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Request parameters for updating a billable metric.
+///
+/// The `code` is used only to build the URL path and is never serialized into
+/// the JSON body (enforced via `#[serde(skip)]`).
+#[derive(Debug, Clone, Serialize)]
+pub struct UpdateBillableMetricRequest {
+    #[serde(skip)]
+    pub code: String,
+    pub billable_metric: UpdateBillableMetricInput,
+}
+
+impl UpdateBillableMetricRequest {
+    /// Creates a new update billable metric request.
+    ///
+    /// # Arguments
+    /// * `code` - The code of the billable metric to update
+    /// * `input` - The billable metric update data
+    pub fn new(code: String, input: UpdateBillableMetricInput) -> Self {
+        Self {
+            code,
+            billable_metric: input,
+        }
+    }
+}
