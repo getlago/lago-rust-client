@@ -299,7 +299,10 @@ println!("Request: {:?} {} - Status {}",
 ```rust
 use lago_types::{
     models::{BillableMetricAggregationType, BillableMetricFilter},
-    requests::billable_metric::{CreateBillableMetricInput, CreateBillableMetricRequest},
+    requests::billable_metric::{
+        CreateBillableMetricInput, CreateBillableMetricRequest, UpdateBillableMetricInput,
+        UpdateBillableMetricRequest,
+    },
 };
 
 // Create a billable metric
@@ -321,6 +324,13 @@ let metrics = client.list_billable_metrics(None).await?;
 let metric = client.get_billable_metric(
     GetBillableMetricRequest::new("storage_gb".to_string())
 ).await?;
+
+// Update a billable metric
+let input = UpdateBillableMetricInput::new()
+    .with_name("Storage Usage (updated)".to_string())
+    .with_description("Updated description".to_string());
+let request = UpdateBillableMetricRequest::new("storage_gb".to_string(), input);
+let updated = client.update_billable_metric(request).await?;
 ```
 
 ### Customers

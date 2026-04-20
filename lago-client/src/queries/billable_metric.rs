@@ -2,9 +2,11 @@ use lago_types::{
     error::{LagoError, Result},
     requests::billable_metric::{
         CreateBillableMetricRequest, GetBillableMetricRequest, ListBillableMetricsRequest,
+        UpdateBillableMetricRequest,
     },
     responses::billable_metric::{
         CreateBillableMetricResponse, GetBillableMetricResponse, ListBillableMetricsResponse,
+        UpdateBillableMetricResponse,
     },
 };
 use url::Url;
@@ -74,5 +76,27 @@ impl LagoClient {
         let url = format!("{}/billable_metrics", region.endpoint());
 
         self.make_request("POST", &url, Some(&request)).await
+    }
+
+    /// Updates an existing billable metric by its code
+    ///
+    /// # Arguments
+    /// * `request` - The request containing the code and the fields to update
+    ///
+    /// # Returns
+    /// A `Result` containing the updated billable metric data or an error
+    pub async fn update_billable_metric(
+        &self,
+        request: UpdateBillableMetricRequest,
+    ) -> Result<UpdateBillableMetricResponse> {
+        let region = self.config.region()?;
+        let url = Url::parse(&format!(
+            "{}/billable_metrics/{}",
+            region.endpoint(),
+            request.code
+        ))
+        .map_err(|e| LagoError::Configuration(format!("Invalid URL: {e}")))?;
+
+        self.make_request("PUT", url.as_str(), Some(&request)).await
     }
 }
