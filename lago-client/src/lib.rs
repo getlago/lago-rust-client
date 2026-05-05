@@ -1,6 +1,7 @@
 pub mod client;
 pub mod config;
 pub mod credentials;
+pub mod observability;
 pub mod queries;
 pub mod region;
 pub mod retry;

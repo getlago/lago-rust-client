@@ -1,5 +1,7 @@
 use reqwest::{Client as HttpClient, Response};
 use serde::de::DeserializeOwned;
+use std::panic::AssertUnwindSafe;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::time::sleep;
 
@@ -7,8 +9,12 @@ use lago_types::error::{LagoError, Result};
 
 use crate::{Config, RetryMode};
 
-/// Information about rate limit headers from the API response
-#[derive(Debug, Clone)]
+/// Information about rate limit headers from the API response.
+///
+/// Delivered to the [`RateLimitInfoCallback`] after every successful request so
+/// callers can build observability around the rate limit (warn at thresholds,
+/// emit metrics, etc.).
+#[derive(Debug, Clone, Default)]
 pub struct RateLimitInfo {
     /// Maximum number of requests allowed in the rate limit window
     pub limit: Option<u32>,
@@ -16,6 +22,24 @@ pub struct RateLimitInfo {
     pub remaining: Option<u32>,
     /// Number of seconds until the rate limit window resets
     pub reset: Option<u64>,
+    /// HTTP method of the call (GET, POST, ...).
+    pub method: String,
+    /// Request URL.
+    pub url: String,
+}
+
+impl RateLimitInfo {
+    /// Returns the fraction of the rate limit currently used in `[0.0, 1.0]`,
+    /// or `None` when the headers aren't usable (missing limit, zero limit,
+    /// missing remaining).
+    pub fn usage_pct(&self) -> Option<f64> {
+        match (self.limit, self.remaining) {
+            (Some(limit), Some(remaining)) if limit > 0 => {
+                Some(1.0 - f64::from(remaining) / f64::from(limit))
+            }
+            _ => None,
+        }
+    }
 }
 
 impl std::fmt::Display for RateLimitInfo {
@@ -33,6 +57,14 @@ impl std::fmt::Display for RateLimitInfo {
         write!(f, "{}", parts.join(", "))
     }
 }
+
+/// Callback invoked after every successful response with parsed rate limit
+/// headers.
+///
+/// Use this to build observability around the rate limit (warn at thresholds,
+/// emit metrics, etc.). Panics raised from the callback are caught and logged
+/// so they cannot break the underlying request flow.
+pub type RateLimitInfoCallback = Arc<dyn Fn(&RateLimitInfo) + Send + Sync>;
 
 /// The main client for interacting with the Lago API
 ///
@@ -140,15 +172,18 @@ impl LagoClient {
                 }
             };
 
-            // Parse rate limit headers before consuming the response
-            let rate_limit_info = if response.status().as_u16() == 429 {
-                Some(self.parse_rate_limit_headers(&response))
-            } else {
-                None
-            };
+            // Parse rate limit headers before consuming the response. Used
+            // both to time 429 retries and to feed the on_rate_limit_info
+            // callback after a successful response.
+            let rate_limit_info = self.parse_rate_limit_info(&response, method, url);
 
             match self.handle_response(response).await {
-                Ok(result) => return Ok(result),
+                Ok(result) => {
+                    if let Some(info) = &rate_limit_info {
+                        self.emit_rate_limit_info(info);
+                    }
+                    return Ok(result);
+                }
                 Err(e) => {
                     if !self.should_retry(&e, attempt) {
                         return Err(e);
@@ -160,6 +195,20 @@ impl LagoClient {
                     continue;
                 }
             }
+        }
+    }
+
+    /// Invokes the configured `on_rate_limit_info` callback (if any) with
+    /// parsed rate limit info, catching panics so a buggy observer cannot
+    /// break the request flow.
+    fn emit_rate_limit_info(&self, info: &RateLimitInfo) {
+        let Some(callback) = self.config.on_rate_limit_info() else {
+            return;
+        };
+
+        let result = std::panic::catch_unwind(AssertUnwindSafe(|| callback(info)));
+        if result.is_err() {
+            eprintln!("lago: on_rate_limit_info callback panicked; suppressing");
         }
     }
 
@@ -189,11 +238,17 @@ impl LagoClient {
         delay.min(Self::MAX_RETRY_DELAY)
     }
 
-    /// Extracts rate limit information from response headers
+    /// Extracts rate limit information from response headers.
     ///
-    /// Parses the x-ratelimit-* headers that are present on every response
-    /// from the Lago API to provide rate limit context.
-    fn parse_rate_limit_headers(&self, response: &Response) -> RateLimitInfo {
+    /// Returns `None` when no `x-ratelimit-*` headers are present (for
+    /// example, on a self-hosted Lago instance that doesn't enforce limits)
+    /// so callers can skip emission entirely when there's nothing to report.
+    fn parse_rate_limit_info(
+        &self,
+        response: &Response,
+        method: &str,
+        url: &str,
+    ) -> Option<RateLimitInfo> {
         let limit = response
             .headers()
             .get("x-ratelimit-limit")
@@ -212,11 +267,17 @@ impl LagoClient {
             .and_then(|h| h.to_str().ok())
             .and_then(|s| s.parse::<u64>().ok());
 
-        RateLimitInfo {
+        if limit.is_none() && remaining.is_none() && reset.is_none() {
+            return None;
+        }
+
+        Some(RateLimitInfo {
             limit,
             remaining,
             reset,
-        }
+            method: method.to_string(),
+            url: url.to_string(),
+        })
     }
 
     /// Processes the HTTP response and converts it to the expected type
@@ -780,6 +841,7 @@ mod tests {
             limit: Some(100),
             remaining: Some(0),
             reset: Some(10),
+            ..Default::default()
         };
 
         let delay = client.get_retry_delay(Some(&info), &LagoError::RateLimit, 1);
@@ -798,6 +860,7 @@ mod tests {
             limit: Some(100),
             remaining: Some(0),
             reset: Some(120),
+            ..Default::default()
         };
 
         let delay = client.get_retry_delay(Some(&info), &LagoError::RateLimit, 1);
@@ -816,6 +879,7 @@ mod tests {
             limit: Some(100),
             remaining: Some(0),
             reset: None,
+            ..Default::default()
         };
 
         let delay = client.get_retry_delay(Some(&info), &LagoError::RateLimit, 1);
@@ -843,5 +907,164 @@ mod tests {
             Duration::from_millis(400),
             "Should use exponential backoff for non-rate-limit errors"
         );
+    }
+
+    // ------------------------------------------------------------------
+    // RateLimitInfo + on_rate_limit_info observability
+    // ------------------------------------------------------------------
+
+    use std::sync::Mutex;
+
+    #[test]
+    fn test_rate_limit_info_usage_pct() {
+        let info = RateLimitInfo {
+            limit: Some(100),
+            remaining: Some(20),
+            ..Default::default()
+        };
+        assert_eq!(info.usage_pct(), Some(0.80));
+
+        let saturated = RateLimitInfo {
+            limit: Some(100),
+            remaining: Some(0),
+            ..Default::default()
+        };
+        assert_eq!(saturated.usage_pct(), Some(1.0));
+    }
+
+    #[test]
+    fn test_rate_limit_info_usage_pct_unusable() {
+        // Missing limit
+        assert_eq!(
+            RateLimitInfo {
+                limit: None,
+                remaining: Some(20),
+                ..Default::default()
+            }
+            .usage_pct(),
+            None,
+        );
+        // Missing remaining
+        assert_eq!(
+            RateLimitInfo {
+                limit: Some(100),
+                remaining: None,
+                ..Default::default()
+            }
+            .usage_pct(),
+            None,
+        );
+        // Zero limit
+        assert_eq!(
+            RateLimitInfo {
+                limit: Some(0),
+                remaining: Some(0),
+                ..Default::default()
+            }
+            .usage_pct(),
+            None,
+        );
+    }
+
+    fn create_observed_client(base_url: &str, callback: RateLimitInfoCallback) -> LagoClient {
+        let config = Config::builder()
+            .credentials(Credentials::new("test-api-key".to_string()))
+            .region(Region::Custom(base_url.to_string()))
+            .timeout(Duration::from_secs(10))
+            .on_rate_limit_info(callback)
+            .build();
+
+        LagoClient::new(config)
+    }
+
+    #[tokio::test]
+    async fn test_on_rate_limit_info_fires_on_success() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(200)
+            .with_header("x-ratelimit-limit", "100")
+            .with_header("x-ratelimit-remaining", "20")
+            .with_header("x-ratelimit-reset", "5")
+            .with_body(json!({"id": "1", "name": "ok"}).to_string())
+            .create_async()
+            .await;
+
+        let captured: Arc<Mutex<Vec<RateLimitInfo>>> = Arc::new(Mutex::new(Vec::new()));
+        let captured_clone = captured.clone();
+        let callback: RateLimitInfoCallback = Arc::new(move |info: &RateLimitInfo| {
+            captured_clone.lock().unwrap().push(info.clone());
+        });
+
+        let client = create_observed_client(&server.url(), callback);
+        let url = format!("{}/test", server.url());
+
+        let _: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
+
+        // Snapshot under the lock then drop the guard before awaiting again
+        // (clippy::await_holding_lock).
+        let snapshot: Vec<RateLimitInfo> = {
+            let guard = captured.lock().unwrap();
+            guard.clone()
+        };
+        assert_eq!(snapshot.len(), 1);
+        assert_eq!(snapshot[0].limit, Some(100));
+        assert_eq!(snapshot[0].remaining, Some(20));
+        assert_eq!(snapshot[0].reset, Some(5));
+        assert_eq!(snapshot[0].method, "GET");
+        assert_eq!(snapshot[0].usage_pct(), Some(0.80));
+
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_on_rate_limit_info_not_called_when_headers_absent() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(200)
+            .with_body(json!({"id": "1", "name": "ok"}).to_string())
+            .create_async()
+            .await;
+
+        let counter: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
+        let counter_clone = counter.clone();
+        let callback: RateLimitInfoCallback = Arc::new(move |_: &RateLimitInfo| {
+            *counter_clone.lock().unwrap() += 1;
+        });
+
+        let client = create_observed_client(&server.url(), callback);
+        let url = format!("{}/test", server.url());
+
+        let _: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
+
+        assert_eq!(*counter.lock().unwrap(), 0);
+        mock.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn test_on_rate_limit_info_panic_is_caught() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/test")
+            .with_status(200)
+            .with_header("x-ratelimit-limit", "100")
+            .with_header("x-ratelimit-remaining", "1")
+            .with_header("x-ratelimit-reset", "5")
+            .with_body(json!({"id": "1", "name": "ok"}).to_string())
+            .create_async()
+            .await;
+
+        let callback: RateLimitInfoCallback = Arc::new(|_: &RateLimitInfo| {
+            panic!("intentional");
+        });
+
+        let client = create_observed_client(&server.url(), callback);
+        let url = format!("{}/test", server.url());
+
+        let result: Result<TestResponse> = client.make_request("GET", &url, None::<&()>).await;
+        assert!(result.is_ok(), "callback panic must not break the request");
+
+        mock.assert_async().await;
     }
 }
