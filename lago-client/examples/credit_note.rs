@@ -154,18 +154,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Step 6: Filter credit notes by customer
-    if let Some(customer) = &invoice.customer {
-        if let Some(ref external_id) = customer.external_id {
-            println!("\n=== Filtering credit notes by customer ===");
-            let filter = CreditNoteFilter::new().with_external_customer_id(external_id.clone());
-            let request = ListCreditNotesRequest::new().with_filters(filter);
-            let filtered = client.list_credit_notes(Some(request)).await?;
-            println!(
-                "Found {} credit notes for customer '{}'",
-                filtered.credit_notes.len(),
-                external_id
-            );
-        }
+    if let Some(customer) = &invoice.customer
+        && let Some(ref external_id) = customer.external_id
+    {
+        println!("\n=== Filtering credit notes by customer ===");
+        let filter = CreditNoteFilter::new().with_external_customer_id(external_id.clone());
+        let request = ListCreditNotesRequest::new().with_filters(filter);
+        let filtered = client.list_credit_notes(Some(request)).await?;
+        println!(
+            "Found {} credit notes for customer '{}'",
+            filtered.credit_notes.len(),
+            external_id
+        );
     }
 
     // Step 7: Filter by reason

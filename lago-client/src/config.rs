@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use super::{
+    client::RateLimitInfoCallback,
     credentials::{
         Credentials, CredentialsProvider, EnvironmentCredentialsProvider, StaticCredentialsProvider,
     },
@@ -20,6 +21,7 @@ pub struct Config {
     pub(crate) timeout: Duration,
     pub(crate) retry_config: RetryConfig,
     pub(crate) user_agent: String,
+    pub(crate) on_rate_limit_info: Option<RateLimitInfoCallback>,
 }
 
 impl Config {
@@ -70,6 +72,14 @@ impl Config {
     pub fn user_agent(&self) -> &str {
         &self.user_agent
     }
+
+    /// Gets the configured `on_rate_limit_info` callback, if any.
+    ///
+    /// The callback is invoked after every successful response with parsed
+    /// rate limit headers. See [`crate::RateLimitInfoCallback`].
+    pub fn on_rate_limit_info(&self) -> Option<&RateLimitInfoCallback> {
+        self.on_rate_limit_info.as_ref()
+    }
 }
 
 impl Default for Config {
@@ -84,6 +94,7 @@ impl Default for Config {
             timeout: Duration::from_secs(30),
             retry_config: RetryConfig::default(),
             user_agent: format!("lago-rust-client/{}", env!("CARGO_PKG_VERSION")),
+            on_rate_limit_info: None,
         }
     }
 }
@@ -98,6 +109,7 @@ pub struct ConfigBuilder {
     timeout: Option<Duration>,
     retry_config: Option<RetryConfig>,
     user_agent: Option<String>,
+    on_rate_limit_info: Option<RateLimitInfoCallback>,
 }
 
 impl ConfigBuilder {
@@ -112,6 +124,7 @@ impl ConfigBuilder {
             timeout: None,
             retry_config: None,
             user_agent: None,
+            on_rate_limit_info: None,
         }
     }
 
@@ -199,6 +212,22 @@ impl ConfigBuilder {
         self
     }
 
+    /// Sets a callback to receive rate limit info after every successful
+    /// response.
+    ///
+    /// Use this to build observability around the rate limit (warn at
+    /// thresholds, emit metrics, etc.). See [`crate::RateLimitInfoCallback`].
+    ///
+    /// # Arguments
+    /// * `callback` - The callback to invoke with parsed rate limit info
+    ///
+    /// # Returns
+    /// The builder instance for method chaining
+    pub fn on_rate_limit_info(mut self, callback: RateLimitInfoCallback) -> Self {
+        self.on_rate_limit_info = Some(callback);
+        self
+    }
+
     /// Builds the final configuration instance
     ///
     /// Any unset values will use the defaults from `Config::default()`.
@@ -218,6 +247,7 @@ impl ConfigBuilder {
             timeout: self.timeout.unwrap_or(default_config.timeout),
             retry_config: self.retry_config.unwrap_or(default_config.retry_config),
             user_agent: self.user_agent.unwrap_or(default_config.user_agent),
+            on_rate_limit_info: self.on_rate_limit_info,
         }
     }
 }
