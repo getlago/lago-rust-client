@@ -41,17 +41,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         // Example 3: List invoices for the same customer
-        if let Some(customer) = &first_invoice.customer {
-            if let Some(customer_id) = &customer.external_id {
-                let list_customer_request = ListCustomerInvoicesRequest::new(customer_id.clone());
-                let customer_invoices =
-                    client.list_customer_invoices(list_customer_request).await?;
-                println!(
-                    "\nCustomer {} has {} invoices",
-                    customer_id,
-                    customer_invoices.invoices.len()
-                );
-            }
+        if let Some(customer) = &first_invoice.customer
+            && let Some(customer_id) = &customer.external_id
+        {
+            let list_customer_request = ListCustomerInvoicesRequest::new(customer_id.clone());
+            let customer_invoices = client.list_customer_invoices(list_customer_request).await?;
+            println!(
+                "\nCustomer {} has {} invoices",
+                customer_id,
+                customer_invoices.invoices.len()
+            );
         }
 
         // Example 4: Update an invoice's metadata
