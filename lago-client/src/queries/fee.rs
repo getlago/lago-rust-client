@@ -21,10 +21,7 @@ impl LagoClient {
     ///
     /// # Returns
     /// A `Result` containing the list of fees and pagination metadata, or an error.
-    pub async fn list_fees(
-        &self,
-        request: Option<ListFeesRequest>,
-    ) -> Result<ListFeesResponse> {
+    pub async fn list_fees(&self, request: Option<ListFeesRequest>) -> Result<ListFeesResponse> {
         let request = request.unwrap_or_default();
         let region = self.config.region()?;
         let mut url = Url::parse(&format!("{}/fees", region.endpoint()))
