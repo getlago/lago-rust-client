@@ -627,7 +627,7 @@ dependencies = [
 
 [[package]]
 name = "lago-client"
-version = "0.1.23"
+version = "0.1.24"
 dependencies = [
  "anyhow",
  "lago-types 0.1.21 (registry+https://github.com/rust-lang/crates.io-index)",
