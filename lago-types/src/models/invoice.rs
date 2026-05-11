@@ -139,6 +139,18 @@ pub struct FeeItem {
     pub description: Option<String>,
 }
 
+/// Type of a fee, used when filtering the `/fees` endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum FeeType {
+    Charge,
+    AddOn,
+    Subscription,
+    Credit,
+    Commitment,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
