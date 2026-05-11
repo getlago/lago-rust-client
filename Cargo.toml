@@ -24,3 +24,10 @@ license = "MIT"
 repository = "https://github.com/getlago/lago-rust-client"
 description = "Lago Rust API Client"
 homepage = "https://github.com/getlago/lago-rust-client"
+
+# Redirect crates.io `lago-types` to the workspace member during local builds.
+# This applies only to development (workspace-root patches are never published).
+# Without it, member crates referencing `lago-types = "<version>"` resolve to
+# the published copy on crates.io and ignore local edits.
+[patch.crates-io]
+lago-types = { path = "lago-types" }
