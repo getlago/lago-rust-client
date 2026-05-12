@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 use uuid::Uuid;
 
-use crate::models::UsageThreshold;
+use crate::models::{FixedCharge, UsageThreshold};
 
 /// Represents a plan in the Lago billing system.
 ///
@@ -43,6 +43,8 @@ pub struct Plan {
     pub parent_id: Option<Uuid>,
     /// Charges associated with this plan.
     pub charges: Option<Vec<PlanCharge>>,
+    /// Fixed charges associated with this plan.
+    pub fixed_charges: Option<Vec<FixedCharge>>,
     /// Taxes associated with this plan.
     pub taxes: Option<Vec<PlanTax>>,
     /// Minimum commitment for this plan.
@@ -98,6 +100,10 @@ pub struct PlanCharge {
     pub lago_billable_metric_id: Option<Uuid>,
     /// The billable metric ID to reference.
     pub billable_metric_id: Option<Uuid>,
+    /// The code of the billable metric.
+    pub billable_metric_code: Option<String>,
+    /// Unique code for the charge.
+    pub code: Option<String>,
     /// When the charge was created.
     pub created_at: Option<DateTime<Utc>>,
     /// The charge model to use.
@@ -122,6 +128,10 @@ pub struct PlanCharge {
     pub filters: Option<Vec<ChargeFilter>>,
     /// The regroup paid fees option.
     pub regroup_paid_fees: Option<String>,
+    /// Applied pricing unit for this charge.
+    pub applied_pricing_unit: Option<serde_json::Value>,
+    /// Whether the charge accepts a target wallet.
+    pub accepts_target_wallet: Option<bool>,
 }
 
 /// Represents a charge filter for differentiated pricing.
