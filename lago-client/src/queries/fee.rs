@@ -50,7 +50,9 @@ impl LagoClient {
     /// A `Result` containing the fee data or an error.
     pub async fn get_fee(&self, request: GetFeeRequest) -> Result<GetFeeResponse> {
         let region = self.config.region()?;
-        let url = format!("{}/fees/{}", region.endpoint(), request.fee_id);
-        self.make_request("GET", &url, None::<&()>).await
+        let url = Url::parse(&format!("{}/fees/{}", region.endpoint(), request.fee_id))
+            .map_err(|e| LagoError::Configuration(format!("Invalid URL: {e}")))?;
+
+        self.make_request("GET", url.as_str(), None::<&()>).await
     }
 }
