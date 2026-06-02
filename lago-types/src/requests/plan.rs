@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::filters::common::ListFilters;
 use crate::filters::plan::PlanFilters;
 use crate::models::{ChargeModel, PaginationParams, PlanInterval};
+use crate::requests::plan_charge::{PresentationGroupKey, set_presentation_group_keys};
 
 /// Request parameters for listing plans.
 #[derive(Debug, Clone)]
@@ -147,6 +148,15 @@ impl CreatePlanChargeInput {
     /// Sets the charge properties.
     pub fn with_properties(mut self, properties: serde_json::Value) -> Self {
         self.properties = Some(properties);
+        self
+    }
+
+    /// Sets presentation group keys inside the charge properties.
+    pub fn with_presentation_group_keys(
+        mut self,
+        presentation_group_keys: Vec<PresentationGroupKey>,
+    ) -> Self {
+        set_presentation_group_keys(&mut self.properties, presentation_group_keys);
         self
     }
 

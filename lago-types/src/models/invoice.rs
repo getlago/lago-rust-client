@@ -4,6 +4,7 @@ use strum_macros::EnumString;
 use uuid::Uuid;
 
 use super::customer::Customer;
+use super::customer_usage::PresentationBreakdown;
 use super::usage_threshold::UsageThreshold;
 
 /// Represents an invoice in the Lago billing system.
@@ -112,6 +113,8 @@ pub struct Fee {
     pub refunded_at: Option<DateTime<Utc>>,
     /// Fee item details
     pub item: Option<FeeItem>,
+    /// Display-only usage breakdowns by presentation group keys.
+    pub presentation_breakdowns: Option<Vec<PresentationBreakdown>>,
 }
 
 /// Payment status of a fee

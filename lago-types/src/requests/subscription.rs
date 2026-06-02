@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::filters::common::ListFilters;
 use crate::filters::subscription::SubscriptionFilters;
 use crate::models::{PaginationParams, SubscriptionBillingTime};
+use crate::requests::plan_charge::{PresentationGroupKey, set_presentation_group_keys};
 
 /// Request parameters for listing subscriptions.
 #[derive(Debug, Clone)]
@@ -425,4 +426,15 @@ pub struct SubscriptionChargeOverride {
     /// Override the pricing properties.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub properties: Option<serde_json::Value>,
+}
+
+impl SubscriptionChargeOverride {
+    /// Sets presentation group keys inside the charge override properties.
+    pub fn with_presentation_group_keys(
+        mut self,
+        presentation_group_keys: Vec<PresentationGroupKey>,
+    ) -> Self {
+        set_presentation_group_keys(&mut self.properties, presentation_group_keys);
+        self
+    }
 }

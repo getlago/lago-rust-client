@@ -2,6 +2,15 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+/// Usage split by presentation group keys for display-only breakdowns.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PresentationBreakdown {
+    /// Event properties used for presentation grouping.
+    pub presentation_by: serde_json::Value,
+    /// Units consumed for this presentation group.
+    pub units: String,
+}
+
 /// Represents the current usage data for a customer's subscription.
 ///
 /// This struct contains information about usage-based billing data
@@ -51,6 +60,8 @@ pub struct ChargeUsage {
     pub filters: Vec<ChargeFilterUsage>,
     /// Grouped usage data
     pub grouped_usage: Vec<GroupedUsage>,
+    /// Display-only usage breakdowns by presentation group keys.
+    pub presentation_breakdowns: Option<Vec<PresentationBreakdown>>,
 }
 
 /// Pricing unit details for custom pricing
@@ -103,6 +114,8 @@ pub struct ChargeFilterUsage {
     pub invoice_display_name: Option<String>,
     /// Filter values
     pub values: serde_json::Value,
+    /// Display-only usage breakdowns by presentation group keys.
+    pub presentation_breakdowns: Option<Vec<PresentationBreakdown>>,
 }
 
 /// Grouped usage data
@@ -120,4 +133,6 @@ pub struct GroupedUsage {
     pub grouped_by: serde_json::Value,
     /// Filters within this group
     pub filters: Vec<ChargeFilterUsage>,
+    /// Display-only usage breakdowns by presentation group keys.
+    pub presentation_breakdowns: Option<Vec<PresentationBreakdown>>,
 }

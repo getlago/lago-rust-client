@@ -10,6 +10,8 @@ pub struct GetCustomerCurrentUsageRequest {
     pub external_subscription_id: String,
     /// Optional flag to determine if taxes should be applied (defaults to true)
     pub apply_taxes: Option<bool>,
+    /// Optional JSON-encoded array of presentation group key values to include.
+    pub filter_by_presentation: Option<String>,
 }
 
 impl GetCustomerCurrentUsageRequest {
@@ -26,6 +28,7 @@ impl GetCustomerCurrentUsageRequest {
             external_customer_id,
             external_subscription_id,
             apply_taxes: None,
+            filter_by_presentation: None,
         }
     }
 
@@ -38,6 +41,15 @@ impl GetCustomerCurrentUsageRequest {
     /// The modified request instance for method chaining.
     pub fn with_apply_taxes(mut self, apply_taxes: bool) -> Self {
         self.apply_taxes = Some(apply_taxes);
+        self
+    }
+
+    /// Sets the presentation breakdown filter for the request.
+    ///
+    /// The value must be a JSON-encoded array of presentation group key values,
+    /// for example `["engineering", "operations"]`.
+    pub fn with_filter_by_presentation(mut self, filter_by_presentation: String) -> Self {
+        self.filter_by_presentation = Some(filter_by_presentation);
         self
     }
 
@@ -55,6 +67,10 @@ impl GetCustomerCurrentUsageRequest {
 
         if let Some(apply_taxes) = self.apply_taxes {
             params.push(("apply_taxes", apply_taxes.to_string()));
+        }
+
+        if let Some(filter_by_presentation) = &self.filter_by_presentation {
+            params.push(("filter_by_presentation", filter_by_presentation.clone()));
         }
 
         params

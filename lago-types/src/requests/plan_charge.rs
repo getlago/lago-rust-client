@@ -4,6 +4,59 @@ use crate::models::{ChargeModel, FixedChargeModel, PaginationParams};
 
 // ─── Charge input types ──────────────────────────────────────────────────────
 
+/// Display-only grouping configuration for charge properties.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PresentationGroupKey {
+    /// The event property to group by.
+    pub value: String,
+    /// Presentation options for this group key.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<PresentationGroupKeyOptions>,
+}
+
+impl PresentationGroupKey {
+    pub fn new(value: String) -> Self {
+        Self {
+            value,
+            options: None,
+        }
+    }
+
+    pub fn with_display_in_invoice(mut self, display_in_invoice: bool) -> Self {
+        self.options = Some(PresentationGroupKeyOptions {
+            display_in_invoice: Some(display_in_invoice),
+        });
+        self
+    }
+}
+
+/// Options for a presentation group key.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PresentationGroupKeyOptions {
+    /// Whether this presentation group key should be displayed on invoices.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_in_invoice: Option<bool>,
+}
+
+pub(crate) fn set_presentation_group_keys(
+    properties: &mut Option<serde_json::Value>,
+    presentation_group_keys: Vec<PresentationGroupKey>,
+) {
+    let value = serde_json::to_value(presentation_group_keys)
+        .expect("presentation group keys should always serialize");
+
+    match properties {
+        Some(serde_json::Value::Object(object)) => {
+            object.insert("presentation_group_keys".to_string(), value);
+        }
+        _ => {
+            let mut object = serde_json::Map::new();
+            object.insert("presentation_group_keys".to_string(), value);
+            *properties = Some(serde_json::Value::Object(object));
+        }
+    }
+}
+
 /// Input data for creating a standalone charge on a plan.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateChargeInput {
@@ -83,6 +136,14 @@ impl CreateChargeInput {
         self
     }
 
+    pub fn with_presentation_group_keys(
+        mut self,
+        presentation_group_keys: Vec<PresentationGroupKey>,
+    ) -> Self {
+        set_presentation_group_keys(&mut self.properties, presentation_group_keys);
+        self
+    }
+
     pub fn with_tax_codes(mut self, tax_codes: Vec<String>) -> Self {
         self.tax_codes = Some(tax_codes);
         self
@@ -119,6 +180,14 @@ pub struct UpdateChargeInput {
 impl UpdateChargeInput {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn with_presentation_group_keys(
+        mut self,
+        presentation_group_keys: Vec<PresentationGroupKey>,
+    ) -> Self {
+        set_presentation_group_keys(&mut self.properties, presentation_group_keys);
+        self
     }
 }
 
