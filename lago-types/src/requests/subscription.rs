@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::filters::common::ListFilters;
 use crate::filters::subscription::SubscriptionFilters;
-use crate::models::{PaginationParams, SubscriptionBillingTime};
+use crate::models::{PaginationParams, SubscriptionActivationRuleType, SubscriptionBillingTime};
 
 /// Request parameters for listing subscriptions.
 #[derive(Debug, Clone)]
@@ -124,6 +124,9 @@ pub struct CreateSubscriptionInput {
     /// Plan overrides to customize the plan for this subscription.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub plan_overrides: Option<SubscriptionPlanOverrides>,
+    /// Activation rules that gate the subscription activation.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub activation_rules: Option<Vec<SubscriptionActivationRuleInput>>,
 }
 
 impl CreateSubscriptionInput {
@@ -138,6 +141,7 @@ impl CreateSubscriptionInput {
             subscription_at: None,
             ending_at: None,
             plan_overrides: None,
+            activation_rules: None,
         }
     }
 
@@ -176,6 +180,15 @@ impl CreateSubscriptionInput {
         self.plan_overrides = Some(plan_overrides);
         self
     }
+
+    /// Sets the activation rules.
+    pub fn with_activation_rules(
+        mut self,
+        activation_rules: Vec<SubscriptionActivationRuleInput>,
+    ) -> Self {
+        self.activation_rules = Some(activation_rules);
+        self
+    }
 }
 
 /// Request for creating a subscription.
@@ -211,6 +224,9 @@ pub struct UpdateSubscriptionInput {
     /// Plan overrides to customize the plan for this subscription.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub plan_overrides: Option<SubscriptionPlanOverrides>,
+    /// Activation rules that gate the subscription activation.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub activation_rules: Option<Vec<SubscriptionActivationRuleInput>>,
 }
 
 impl UpdateSubscriptionInput {
@@ -222,6 +238,7 @@ impl UpdateSubscriptionInput {
             plan_code: None,
             subscription_at: None,
             plan_overrides: None,
+            activation_rules: None,
         }
     }
 
@@ -252,6 +269,15 @@ impl UpdateSubscriptionInput {
     /// Sets plan overrides.
     pub fn with_plan_overrides(mut self, plan_overrides: SubscriptionPlanOverrides) -> Self {
         self.plan_overrides = Some(plan_overrides);
+        self
+    }
+
+    /// Sets the activation rules.
+    pub fn with_activation_rules(
+        mut self,
+        activation_rules: Vec<SubscriptionActivationRuleInput>,
+    ) -> Self {
+        self.activation_rules = Some(activation_rules);
         self
     }
 }
@@ -425,4 +451,31 @@ pub struct SubscriptionChargeOverride {
     /// Override the pricing properties.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub properties: Option<serde_json::Value>,
+}
+
+/// Input for an activation rule that gates a subscription's activation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SubscriptionActivationRuleInput {
+    /// The type of the activation rule.
+    #[serde(rename = "type")]
+    pub rule_type: SubscriptionActivationRuleType,
+    /// Hours the subscription stays incomplete awaiting payment before cancellation.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timeout_hours: Option<i64>,
+}
+
+impl SubscriptionActivationRuleInput {
+    /// Creates a new activation rule input of the given type.
+    pub fn new(rule_type: SubscriptionActivationRuleType) -> Self {
+        Self {
+            rule_type,
+            timeout_hours: None,
+        }
+    }
+
+    /// Sets the timeout in hours.
+    pub fn with_timeout_hours(mut self, timeout_hours: i64) -> Self {
+        self.timeout_hours = Some(timeout_hours);
+        self
+    }
 }
