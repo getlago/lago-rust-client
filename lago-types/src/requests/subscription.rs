@@ -127,6 +127,9 @@ pub struct CreateSubscriptionInput {
     /// Activation rules that gate the subscription activation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub activation_rules: Option<Vec<SubscriptionActivationRuleInput>>,
+    /// Purchase order number added to invoices generated for this subscription.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub purchase_order_number: Option<String>,
 }
 
 impl CreateSubscriptionInput {
@@ -142,6 +145,7 @@ impl CreateSubscriptionInput {
             ending_at: None,
             plan_overrides: None,
             activation_rules: None,
+            purchase_order_number: None,
         }
     }
 
@@ -189,6 +193,12 @@ impl CreateSubscriptionInput {
         self.activation_rules = Some(activation_rules);
         self
     }
+
+    /// Sets the purchase order number.
+    pub fn with_purchase_order_number(mut self, purchase_order_number: String) -> Self {
+        self.purchase_order_number = Some(purchase_order_number);
+        self
+    }
 }
 
 /// Request for creating a subscription.
@@ -227,6 +237,9 @@ pub struct UpdateSubscriptionInput {
     /// Activation rules that gate the subscription activation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub activation_rules: Option<Vec<SubscriptionActivationRuleInput>>,
+    /// Purchase order number added to invoices generated for this subscription.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub purchase_order_number: Option<String>,
 }
 
 impl UpdateSubscriptionInput {
@@ -239,6 +252,7 @@ impl UpdateSubscriptionInput {
             subscription_at: None,
             plan_overrides: None,
             activation_rules: None,
+            purchase_order_number: None,
         }
     }
 
@@ -278,6 +292,12 @@ impl UpdateSubscriptionInput {
         activation_rules: Vec<SubscriptionActivationRuleInput>,
     ) -> Self {
         self.activation_rules = Some(activation_rules);
+        self
+    }
+
+    /// Sets the purchase order number.
+    pub fn with_purchase_order_number(mut self, purchase_order_number: String) -> Self {
+        self.purchase_order_number = Some(purchase_order_number);
         self
     }
 }
