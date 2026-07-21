@@ -57,6 +57,8 @@ pub struct Subscription {
     pub activated_at: Option<DateTime<Utc>>,
     /// Activation rules gating the subscription activation.
     pub activation_rules: Option<Vec<SubscriptionActivationRule>>,
+    /// Purchase order number added to invoices generated for this subscription.
+    pub purchase_order_number: Option<String>,
 }
 
 /// Billing time determines when recurring billing cycles occur.
