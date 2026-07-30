@@ -1,6 +1,6 @@
 [package]
 name = "lago-client"
-version = "0.1.25"
+version = "0.1.26"
 edition = "2024"
 authors = ["Lago Team <tech@getlago.com>"]
 description = "Lago API client"
@@ -85,3 +85,7 @@ path = "examples/plan.rs"
 [[example]]
 name = "payment"
 path = "examples/payment.rs"
+
+[[example]]
+name = "staging_delete_invoice"
+path = "examples/staging_delete_invoice.rs"
