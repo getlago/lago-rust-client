@@ -111,6 +111,28 @@ impl GetInvoiceRequest {
     }
 }
 
+/// Request parameters for deleting a draft invoice.
+///
+/// This struct contains the identifier needed to permanently delete a
+/// `draft` invoice from the API.
+#[derive(Debug, Clone)]
+pub struct DeleteInvoiceRequest {
+    pub invoice_id: String,
+}
+
+impl DeleteInvoiceRequest {
+    /// Creates a new delete invoice request.
+    ///
+    /// # Arguments
+    /// * `invoice_id` - The unique identifier of the draft invoice to delete
+    ///
+    /// # Returns
+    /// A new `DeleteInvoiceRequest` instance with the specified invoice ID.
+    pub fn new(invoice_id: String) -> Self {
+        Self { invoice_id }
+    }
+}
+
 /// Billing time determines when recurring billing cycles occur.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

@@ -20,6 +20,15 @@ pub struct GetInvoiceResponse {
     pub invoice: Invoice,
 }
 
+/// Response containing a single invoice.
+///
+/// This struct represents the API response returned when deleting a draft
+/// invoice; it carries the invoice as it was at the moment of deletion.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeleteInvoiceResponse {
+    pub invoice: Invoice,
+}
+
 /// Response containing a previewed invoice.
 ///
 /// This struct represents the API response for the invoice preview endpoint.

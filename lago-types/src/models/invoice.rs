@@ -172,6 +172,7 @@ pub enum InvoiceStatus {
     Voided,
     Pending,
     Failed,
+    Deleted,
 }
 
 /// Defines the payment status of an invoice.
