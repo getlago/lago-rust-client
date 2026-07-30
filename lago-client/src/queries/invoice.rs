@@ -1,14 +1,16 @@
 use lago_types::{
     error::{LagoError, Result},
     requests::invoice::{
-        CreateInvoiceRequest, DownloadInvoiceRequest, GetInvoiceRequest, InvoicePreviewRequest,
-        ListCustomerInvoicesRequest, ListInvoicesRequest, RefreshInvoiceRequest,
-        RetryInvoicePaymentRequest, RetryInvoiceRequest, UpdateInvoiceRequest, VoidInvoiceRequest,
+        CreateInvoiceRequest, DeleteInvoiceRequest, DownloadInvoiceRequest, GetInvoiceRequest,
+        InvoicePreviewRequest, ListCustomerInvoicesRequest, ListInvoicesRequest,
+        RefreshInvoiceRequest, RetryInvoicePaymentRequest, RetryInvoiceRequest,
+        UpdateInvoiceRequest, VoidInvoiceRequest,
     },
     responses::invoice::{
-        CreateInvoiceResponse, DownloadInvoiceResponse, GetInvoiceResponse, InvoicePreviewResponse,
-        ListInvoicesResponse, RefreshInvoiceResponse, RetryInvoicePaymentResponse,
-        RetryInvoiceResponse, UpdateInvoiceResponse, VoidInvoiceResponse,
+        CreateInvoiceResponse, DeleteInvoiceResponse, DownloadInvoiceResponse, GetInvoiceResponse,
+        InvoicePreviewResponse, ListInvoicesResponse, RefreshInvoiceResponse,
+        RetryInvoicePaymentResponse, RetryInvoiceResponse, UpdateInvoiceResponse,
+        VoidInvoiceResponse,
     },
 };
 use url::Url;
@@ -58,6 +60,25 @@ impl LagoClient {
         let region = self.config.region()?;
         let url = format!("{}/invoices/{}", region.endpoint(), request.invoice_id);
         self.make_request("GET", &url, None::<&()>).await
+    }
+
+    /// Deletes a draft invoice
+    ///
+    /// Only invoices in the `draft` status can be deleted. The deleted invoice
+    /// is returned and is no longer retrievable afterwards.
+    ///
+    /// # Arguments
+    /// * `request` - The delete invoice request containing the invoice ID
+    ///
+    /// # Returns
+    /// A `Result` containing the deleted invoice or an error
+    pub async fn delete_invoice(
+        &self,
+        request: DeleteInvoiceRequest,
+    ) -> Result<DeleteInvoiceResponse> {
+        let region = self.config.region()?;
+        let url = format!("{}/invoices/{}", region.endpoint(), request.invoice_id);
+        self.make_request("DELETE", &url, None::<&()>).await
     }
 
     /// Previews an invoice without creating it
