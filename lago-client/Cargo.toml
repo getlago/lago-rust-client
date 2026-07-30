@@ -85,7 +85,3 @@ path = "examples/plan.rs"
 [[example]]
 name = "payment"
 path = "examples/payment.rs"
-
-[[example]]
-name = "staging_delete_invoice"
-path = "examples/staging_delete_invoice.rs"
