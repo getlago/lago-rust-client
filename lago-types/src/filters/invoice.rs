@@ -16,6 +16,7 @@ pub struct InvoiceFilters {
     pub status: Option<InvoiceStatus>,
     pub payment_status: Option<InvoicePaymentStatus>,
     pub invoice_type: Option<InvoiceType>,
+    pub purchase_order_number: Option<String>,
 }
 
 impl InvoiceFilters {
@@ -111,6 +112,20 @@ impl InvoiceFilters {
         self.invoice_type = Some(invoice_type);
         self
     }
+
+    /// Sets the purchase order number filter.
+    ///
+    /// The match is exact but case-insensitive.
+    ///
+    /// # Arguments
+    /// * `purchase_order_number` - The purchase order number to filter by
+    ///
+    /// # Returns
+    /// The modified filter instance for method chaining.
+    pub fn with_purchase_order_number(mut self, purchase_order_number: String) -> Self {
+        self.purchase_order_number = Some(purchase_order_number);
+        self
+    }
 }
 
 impl ListFilters for InvoiceFilters {
@@ -150,6 +165,28 @@ impl ListFilters for InvoiceFilters {
             params.push(("invoice_type", format!("{invoice_type:?}").to_lowercase()));
         }
 
+        if let Some(purchase_order_number) = &self.purchase_order_number {
+            params.push(("purchase_order_number", purchase_order_number.clone()));
+        }
+
         params
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn purchase_order_number_is_sent_as_query_param() {
+        let filters = InvoiceFilters::new().with_purchase_order_number("PO-123".to_string());
+        assert!(
+            filters
+                .to_query_params()
+                .contains(&("purchase_order_number", "PO-123".to_string()))
+        );
+
+        let empty = InvoiceFilters::new();
+        assert!(empty.to_query_params().is_empty());
     }
 }
