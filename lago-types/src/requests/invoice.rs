@@ -553,6 +553,9 @@ pub struct CreateInvoiceInput {
     pub currency: String,
     /// The list of fees to include in the invoice.
     pub fees: Vec<CreateInvoiceFeeInput>,
+    /// Optional purchase order number to associate with the invoice.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub purchase_order_number: Option<String>,
 }
 
 impl CreateInvoiceInput {
@@ -574,7 +577,14 @@ impl CreateInvoiceInput {
             external_customer_id,
             currency,
             fees,
+            purchase_order_number: None,
         }
+    }
+
+    /// Sets the purchase order number to associate with the invoice.
+    pub fn with_purchase_order_number(mut self, purchase_order_number: String) -> Self {
+        self.purchase_order_number = Some(purchase_order_number);
+        self
     }
 }
 

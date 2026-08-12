@@ -14,6 +14,7 @@ pub struct CreditNoteFilter {
     pub credit_status: Option<CreditNoteCreditStatus>,
     pub refund_status: Option<CreditNoteRefundStatus>,
     pub invoice_number: Option<String>,
+    pub purchase_order_number: Option<String>,
     pub amount_from: Option<i64>,
     pub amount_to: Option<i64>,
 }
@@ -79,6 +80,14 @@ impl CreditNoteFilter {
         self
     }
 
+    /// Filter by the purchase order number of the related invoice.
+    ///
+    /// The match is exact but case-insensitive.
+    pub fn with_purchase_order_number(mut self, number: String) -> Self {
+        self.purchase_order_number = Some(number);
+        self
+    }
+
     /// Filter by minimum amount in cents.
     pub fn with_amount_from(mut self, amount: i64) -> Self {
         self.amount_from = Some(amount);
@@ -135,6 +144,10 @@ impl ListFilters for CreditNoteFilter {
             params.push(("invoice_number", number.clone()));
         }
 
+        if let Some(ref number) = self.purchase_order_number {
+            params.push(("purchase_order_number", number.clone()));
+        }
+
         if let Some(amount) = self.amount_from {
             params.push(("amount_from", amount.to_string()));
         }
@@ -144,5 +157,23 @@ impl ListFilters for CreditNoteFilter {
         }
 
         params
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn purchase_order_number_is_sent_as_query_param() {
+        let filter = CreditNoteFilter::new().with_purchase_order_number("PO-123".to_string());
+        assert!(
+            filter
+                .to_query_params()
+                .contains(&("purchase_order_number", "PO-123".to_string()))
+        );
+
+        let empty = CreditNoteFilter::new();
+        assert!(empty.to_query_params().is_empty());
     }
 }

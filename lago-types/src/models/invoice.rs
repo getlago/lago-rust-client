@@ -16,6 +16,7 @@ pub struct Invoice {
     pub billing_entity_code: Option<String>,
     pub sequential_id: Option<i32>,
     pub number: String,
+    pub purchase_order_number: Option<String>,
     pub issuing_date: String,
     pub invoice_type: InvoiceType,
     pub status: InvoiceStatus,

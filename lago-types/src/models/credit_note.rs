@@ -20,6 +20,8 @@ pub struct CreditNote {
     pub lago_invoice_id: Uuid,
     /// Number of the related invoice
     pub invoice_number: String,
+    /// Purchase order number of the related invoice
+    pub purchase_order_number: Option<String>,
     /// Date when the credit note was issued
     pub issuing_date: String,
     /// Status of the credit (available, consumed, voided)
