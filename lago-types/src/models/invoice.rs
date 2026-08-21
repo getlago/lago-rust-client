@@ -40,6 +40,7 @@ pub struct Invoice {
     pub net_payment_term: Option<i32>,
     pub self_billed: Option<bool>,
     pub file_url: Option<String>,
+    pub web_url: Option<String>,
     pub customer: Option<Customer>,
     pub billing_periods: Option<Vec<InvoiceBillingPeriod>>,
     pub metadata: Option<Vec<InvoiceMetadata>>,
