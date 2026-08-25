@@ -501,6 +501,16 @@ pub struct CreateInvoiceFeeInput {
     /// Optional tax codes to apply to this fee.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_codes: Option<Vec<String>>,
+    /// Lower boundary of the service period covered by this fee.
+    /// ISO 8601 datetime expressed in UTC, e.g. `2022-08-08T00:00:00Z`.
+    /// Must be set together with `to_datetime` — the API rejects one without the other.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub from_datetime: Option<String>,
+    /// Upper boundary of the service period covered by this fee.
+    /// ISO 8601 datetime expressed in UTC, e.g. `2022-08-31T23:59:59Z`.
+    /// Must be set together with `from_datetime` — the API rejects one without the other.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub to_datetime: Option<String>,
 }
 
 impl CreateInvoiceFeeInput {
@@ -519,6 +529,8 @@ impl CreateInvoiceFeeInput {
             unit_amount_cents: None,
             description: None,
             tax_codes: None,
+            from_datetime: None,
+            to_datetime: None,
         }
     }
 
@@ -537,6 +549,20 @@ impl CreateInvoiceFeeInput {
     /// Sets the tax codes to apply to this fee.
     pub fn with_tax_codes(mut self, tax_codes: Vec<String>) -> Self {
         self.tax_codes = Some(tax_codes);
+        self
+    }
+
+    /// Sets the service period covered by this fee.
+    ///
+    /// The API requires both boundaries together, so they are set as a pair.
+    /// Both expect an ISO 8601 datetime expressed in UTC.
+    ///
+    /// # Arguments
+    /// * `from_datetime` - Lower boundary, e.g. `2022-08-08T00:00:00Z`
+    /// * `to_datetime` - Upper boundary, e.g. `2022-08-31T23:59:59Z`
+    pub fn with_service_period(mut self, from_datetime: String, to_datetime: String) -> Self {
+        self.from_datetime = Some(from_datetime);
+        self.to_datetime = Some(to_datetime);
         self
     }
 }
@@ -891,5 +917,31 @@ impl VoidInvoiceRequest {
     /// A new `VoidInvoiceRequest` instance
     pub fn new(lago_id: String) -> Self {
         Self { lago_id }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn service_period_is_omitted_when_unset() {
+        let fee = CreateInvoiceFeeInput::new("setup_fee".to_string(), 1.0);
+        let json = serde_json::to_value(&fee).unwrap();
+
+        assert!(json.get("from_datetime").is_none());
+        assert!(json.get("to_datetime").is_none());
+    }
+
+    #[test]
+    fn service_period_is_serialized_when_set() {
+        let fee = CreateInvoiceFeeInput::new("setup_fee".to_string(), 1.0).with_service_period(
+            "2022-08-08T00:00:00Z".to_string(),
+            "2022-08-31T23:59:59Z".to_string(),
+        );
+        let json = serde_json::to_value(&fee).unwrap();
+
+        assert_eq!(json["from_datetime"], "2022-08-08T00:00:00Z");
+        assert_eq!(json["to_datetime"], "2022-08-31T23:59:59Z");
     }
 }
