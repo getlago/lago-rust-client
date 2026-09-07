@@ -9,5 +9,6 @@ pub mod customer;
 pub mod date_range;
 pub mod fee;
 pub mod invoice;
+pub mod payment;
 pub mod plan;
 pub mod subscription;
