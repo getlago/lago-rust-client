@@ -421,6 +421,6 @@ let customer_payments = client.list_customer_payments(
 ```
 
 Additional builders cover `payment_statuses` (alias), `amount_to`, `receipt_number`,
-`created_at_from`, `created_at_to`, `payment_provider_type`, `payment_method_type`,
-`invoice_number`, `payment_type`, `payable_type` and `search_term`. Existing
+`created_at_from`, `created_at_to`, `payment_provider_type`, `invoice_number`,
+`payment_type`, `payable_type` and `search_term`. Existing
 pagination, invoice ID and external customer ID builders still apply.

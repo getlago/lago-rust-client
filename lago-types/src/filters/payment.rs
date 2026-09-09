@@ -1,23 +1,7 @@
 use serde::{Deserialize, Serialize};
-use strum_macros::Display;
 
 use crate::filters::common::ListFilters;
 use crate::models::payment::{PayableType, PaymentProviderType, PaymentStatus, PaymentType};
-
-/// Provider payment method types accepted by payment list filters.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Display)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
-pub enum PaymentMethodType {
-    Card,
-    SepaDebit,
-    UsBankAccount,
-    BacsDebit,
-    Link,
-    Boleto,
-    Crypto,
-    CustomerBalance,
-}
 
 /// Payment list filters. Filters combine with AND; values within each vector combine with OR.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -46,9 +30,6 @@ pub struct PaymentFilters {
     /// Match any payment provider type.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_provider_type: Option<Vec<PaymentProviderType>>,
-    /// Match any provider method type, including the saved-method fallback.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub payment_method_type: Option<Vec<PaymentMethodType>>,
     /// ISO currency code.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
@@ -111,11 +92,6 @@ impl PaymentFilters {
         self.payment_provider_type = Some(value);
         self
     }
-    /// Match any provider method type, including the saved-method fallback.
-    pub fn with_payment_method_type(mut self, value: Vec<PaymentMethodType>) -> Self {
-        self.payment_method_type = Some(value);
-        self
-    }
     /// ISO currency code.
     pub fn with_currency(mut self, value: String) -> Self {
         self.currency = Some(value);
@@ -173,9 +149,6 @@ impl ListFilters for PaymentFilters {
                 format!("{value:?}").to_lowercase(),
             ));
         }
-        for value in self.payment_method_type.iter().flatten() {
-            params.push(("payment_method_type[]", value.to_string()));
-        }
         if let Some(value) = &self.currency {
             params.push(("currency", value.to_string()));
         }
@@ -215,7 +188,6 @@ mod tests {
                 PaymentProviderType::Stripe,
                 PaymentProviderType::Gocardless,
             ])
-            .with_payment_method_type(vec![PaymentMethodType::Card, PaymentMethodType::SepaDebit])
             .with_currency("EUR".into())
             .with_invoice_number("LAG & +/#2".into())
             .with_payment_type(vec![PaymentType::Manual, PaymentType::Provider])
@@ -223,10 +195,6 @@ mod tests {
             .with_search_term("pi_3 & +/#".into());
         let json = serde_json::to_value(&filters).unwrap();
         assert_eq!(json["amount_to"].as_i64(), Some(i64::MAX));
-        assert_eq!(
-            json["payment_method_type"],
-            serde_json::json!(["card", "sepa_debit"])
-        );
         let roundtrip: PaymentFilters = serde_json::from_value(json).unwrap();
         let expected = vec![
             ("payment_status[]", "succeeded"),
@@ -240,8 +208,6 @@ mod tests {
             ("created_at_to", "2026-09-07"),
             ("payment_provider_type[]", "stripe"),
             ("payment_provider_type[]", "gocardless"),
-            ("payment_method_type[]", "card"),
-            ("payment_method_type[]", "sepa_debit"),
             ("currency", "EUR"),
             ("invoice_number", "LAG & +/#2"),
             ("payment_type[]", "manual"),
@@ -292,22 +258,5 @@ mod tests {
                 .to_query_params()
                 .is_empty()
         );
-    }
-
-    #[test]
-    fn method_types_use_their_serde_names_in_queries() {
-        for (method, wire) in [
-            (PaymentMethodType::Card, "card"),
-            (PaymentMethodType::SepaDebit, "sepa_debit"),
-            (PaymentMethodType::UsBankAccount, "us_bank_account"),
-            (PaymentMethodType::BacsDebit, "bacs_debit"),
-            (PaymentMethodType::Link, "link"),
-            (PaymentMethodType::Boleto, "boleto"),
-            (PaymentMethodType::Crypto, "crypto"),
-            (PaymentMethodType::CustomerBalance, "customer_balance"),
-        ] {
-            assert_eq!(serde_json::to_value(&method).unwrap(), wire);
-            assert_eq!(method.to_string(), wire);
-        }
     }
 }

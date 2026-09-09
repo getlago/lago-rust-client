@@ -98,7 +98,7 @@ impl LagoClient {
 mod tests {
     use super::*;
     use crate::{Config, Credentials, Region};
-    use lago_types::filters::payment::{PaymentFilters, PaymentMethodType};
+    use lago_types::filters::payment::PaymentFilters;
     use lago_types::models::payment::PaymentStatus;
     use mockito::{Matcher, Server};
 
@@ -122,8 +122,6 @@ mod tests {
                 .match_query(Matcher::AllOf(vec![
                     Matcher::Regex("(?:^|&)payment_status%5B%5D=succeeded(?:&|$)".into()),
                     Matcher::Regex("(?:^|&)payment_status%5B%5D=failed(?:&|$)".into()),
-                    Matcher::Regex("(?:^|&)payment_method_type%5B%5D=card(?:&|$)".into()),
-                    Matcher::Regex("(?:^|&)payment_method_type%5B%5D=sepa_debit(?:&|$)".into()),
                     Matcher::UrlEncoded("amount_from".into(), "0".into()),
                     Matcher::UrlEncoded("amount_to".into(), "9223372036854775807".into()),
                     Matcher::UrlEncoded("receipt_number".into(), "Rcpt & +/#1".into()),
@@ -135,10 +133,6 @@ mod tests {
                 .create_async().await;
             let filters = PaymentFilters::new()
                 .with_payment_status(vec![PaymentStatus::Succeeded, PaymentStatus::Failed])
-                .with_payment_method_type(vec![
-                    PaymentMethodType::Card,
-                    PaymentMethodType::SepaDebit,
-                ])
                 .with_amount_from(0)
                 .with_amount_to(i64::MAX)
                 .with_receipt_number("Rcpt & +/#1".into())
