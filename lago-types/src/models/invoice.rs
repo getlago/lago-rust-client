@@ -260,3 +260,77 @@ pub struct InvoiceAppliedUsageThreshold {
     pub created_at: DateTime<Utc>,
     pub usage_threshold: UsageThreshold,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::customer::{CustomerIntegrationType, CustomerPaymentProvider};
+
+    fn invoice_json(integration_type: &str, payment_provider: &str) -> String {
+        format!(
+            r#"{{
+                "lago_id": "1a901a90-1a90-1a90-1a90-1a901a901a90",
+                "number": "LAG-1234-001-001",
+                "issuing_date": "2026-10-01",
+                "invoice_type": "subscription",
+                "status": "finalized",
+                "payment_status": "pending",
+                "currency": "EUR",
+                "fees_amount_cents": 100,
+                "coupons_amount_cents": 0,
+                "credit_notes_amount_cents": 0,
+                "sub_total_excluding_taxes_amount_cents": 100,
+                "taxes_amount_cents": 20,
+                "sub_total_including_taxes_amount_cents": 120,
+                "prepaid_credit_amount_cents": 0,
+                "progressive_billing_credit_amount_cents": 0,
+                "total_amount_cents": 120,
+                "created_at": "2026-10-01T00:00:00Z",
+                "updated_at": "2026-10-01T00:00:00Z",
+                "customer": {{
+                    "lago_id": "2b012b01-2b01-2b01-2b01-2b012b012b01",
+                    "external_id": "customer_123",
+                    "applicable_timezone": "UTC",
+                    "created_at": "2026-01-01T00:00:00Z",
+                    "updated_at": "2026-01-01T00:00:00Z",
+                    "billing_entity_code": "default",
+                    "account_type": "customer",
+                    "finalize_zero_amount_invoice": "inherit",
+                    "skip_invoice_custom_sections": false,
+                    "billing_configuration": {{
+                        "payment_provider": "{payment_provider}",
+                        "payment_provider_code": "my_provider"
+                    }},
+                    "shipping_address": {{}},
+                    "metadata": [],
+                    "integration_customers": [
+                        {{
+                            "lago_id": "3c123c12-3c12-3c12-3c12-3c123c123c12",
+                            "type": "{integration_type}",
+                            "integration_code": "my_integration",
+                            "external_customer_id": null,
+                            "subsidiary_id": null
+                        }}
+                    ]
+                }}
+            }}"#
+        )
+    }
+
+    #[test]
+    fn deserializes_a_customer_with_a_new_integration_and_payment_provider() {
+        let invoice: Invoice = serde_json::from_str(&invoice_json("hubspot", "moneyhash")).unwrap();
+        let customer = invoice.customer.unwrap();
+        let integration = &customer.integration_customers[0];
+
+        assert!(matches!(
+            integration.integration_type,
+            CustomerIntegrationType::Hubspot
+        ));
+        assert!(!integration.sync_with_provider);
+        assert!(matches!(
+            customer.billing_configuration.payment_provider,
+            Some(CustomerPaymentProvider::Moneyhash)
+        ));
+    }
+}
