@@ -149,4 +149,27 @@ mod tests {
             vec![Uuid::parse_str("1a901a90-1a90-1a90-1a90-1a901a901a90").unwrap()]
         );
     }
+
+    #[test]
+    fn deserializes_empty_invoice_numbers() {
+        let json = payment_json().replace(
+            r#""invoice_numbers": ["LAG-1234-001-001"],"#,
+            r#""invoice_numbers": [],"#,
+        );
+        let payment: Payment = serde_json::from_str(&json).unwrap();
+
+        assert!(payment.invoice_numbers.is_empty());
+    }
+
+    #[test]
+    fn rejects_payment_without_invoice_numbers() {
+        let json = payment_json().replace(r#""invoice_numbers": ["LAG-1234-001-001"],"#, "");
+        let error = serde_json::from_str::<Payment>(&json).unwrap_err();
+
+        assert!(
+            error
+                .to_string()
+                .contains("missing field `invoice_numbers`")
+        );
+    }
 }
