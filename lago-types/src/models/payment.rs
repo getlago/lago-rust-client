@@ -18,6 +18,8 @@ pub struct Payment {
     pub external_customer_id: String,
     /// List of invoice IDs associated with the payment.
     pub invoice_ids: Vec<Uuid>,
+    /// List of invoice numbers associated with the payment.
+    pub invoice_numbers: Vec<String>,
     /// The unique identifier of the paid resource in Lago.
     pub lago_payable_id: Uuid,
     /// The type of the paid resource (Invoice or PaymentRequest).
@@ -109,4 +111,65 @@ pub enum PaymentProviderType {
     /// MoneyHash payment provider.
     #[serde(alias = "PaymentProviders::MoneyhashProvider")]
     Moneyhash,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn payment_json() -> String {
+        r#"{
+            "lago_id": "3c123c12-3c12-3c12-3c12-3c123c123c12",
+            "lago_customer_id": "2b012b01-2b01-2b01-2b01-2b012b012b01",
+            "external_customer_id": "customer_123",
+            "invoice_ids": ["1a901a90-1a90-1a90-1a90-1a901a901a90"],
+            "invoice_numbers": ["LAG-1234-001-001"],
+            "lago_payable_id": "1a901a90-1a90-1a90-1a90-1a901a901a90",
+            "payable_type": "Invoice",
+            "amount_cents": 120,
+            "amount_currency": "EUR",
+            "status": "succeeded",
+            "payment_status": "succeeded",
+            "type": "manual",
+            "created_at": "2026-10-01T00:00:00Z"
+        }"#
+        .to_string()
+    }
+
+    #[test]
+    fn deserializes_invoice_numbers() {
+        let payment: Payment = serde_json::from_str(&payment_json()).unwrap();
+
+        assert_eq!(
+            payment.invoice_numbers,
+            vec!["LAG-1234-001-001".to_string()]
+        );
+        assert_eq!(
+            payment.invoice_ids,
+            vec![Uuid::parse_str("1a901a90-1a90-1a90-1a90-1a901a901a90").unwrap()]
+        );
+    }
+
+    #[test]
+    fn deserializes_empty_invoice_numbers() {
+        let json = payment_json().replace(
+            r#""invoice_numbers": ["LAG-1234-001-001"],"#,
+            r#""invoice_numbers": [],"#,
+        );
+        let payment: Payment = serde_json::from_str(&json).unwrap();
+
+        assert!(payment.invoice_numbers.is_empty());
+    }
+
+    #[test]
+    fn rejects_payment_without_invoice_numbers() {
+        let json = payment_json().replace(r#""invoice_numbers": ["LAG-1234-001-001"],"#, "");
+        let error = serde_json::from_str::<Payment>(&json).unwrap_err();
+
+        assert!(
+            error
+                .to_string()
+                .contains("missing field `invoice_numbers`")
+        );
+    }
 }
