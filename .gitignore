@@ -3,4 +3,5 @@
 /lago-types/src/target
 /lago-client/.env
 
-CLAUDE.md.claude
+CLAUDE.md
+.claude/worktrees/
