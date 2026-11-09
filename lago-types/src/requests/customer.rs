@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::filters::{common::ListFilters, customer::CustomerFilter};
 use crate::models::{
     CustomerFinalizeZeroAmountInvoice, CustomerPaymentProvider, CustomerType, PaginationParams,
+    PaymentTerm,
 };
 
 #[derive(Debug, Clone)]
@@ -85,29 +86,55 @@ impl GetCustomerRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateCustomerInput {
     pub external_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub firstname: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lastname: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub email: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub address_line1: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub address_line2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub city: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub country: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zipcode: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub phone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub legal_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub legal_number: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub logo_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tax_identification_number: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timezone: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub net_payment_term: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_term: Option<PaymentTerm>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub customer_type: Option<CustomerType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub finalize_zero_amount_invoice: Option<CustomerFinalizeZeroAmountInvoice>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub billing_configuration: Option<CreateCustomerBillingConfiguration>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub shipping_address: Option<CreateCustomerShippingAddress>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub metadata: Option<Vec<CreateCustomerMetadata>>,
 }
 
@@ -141,6 +168,7 @@ impl CreateCustomerInput {
             timezone: None,
             currency: None,
             net_payment_term: None,
+            payment_term: None,
             customer_type: None,
             finalize_zero_amount_invoice: None,
             billing_configuration: None,
@@ -223,6 +251,11 @@ impl CreateCustomerInput {
         self
     }
 
+    pub fn with_payment_term(mut self, payment_term: PaymentTerm) -> Self {
+        self.payment_term = Some(payment_term);
+        self
+    }
+
     pub fn with_customer_type(mut self, customer_type: CustomerType) -> Self {
         self.customer_type = Some(customer_type);
         self
@@ -257,23 +290,37 @@ impl CreateCustomerInput {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateCustomerBillingConfiguration {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub invoice_grace_period: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_provider: Option<CustomerPaymentProvider>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub payment_provider_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub provider_customer_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sync: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sync_with_provider: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub provider_payment_methods: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateCustomerShippingAddress {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub address_line1: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub address_line2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub city: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub country: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub zipcode: Option<String>,
 }
 
@@ -299,5 +346,63 @@ impl CreateCustomerRequest {
     /// A new `CreateCustomerRequest` instance
     pub fn new(customer: CreateCustomerInput) -> Self {
         Self { customer }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::PaymentTermType;
+
+    #[test]
+    fn omits_every_unset_field() {
+        let input = CreateCustomerInput::new("customer_123".to_string());
+        let json = serde_json::to_value(&input).unwrap();
+
+        assert_eq!(json, serde_json::json!({ "external_id": "customer_123" }));
+    }
+
+    #[test]
+    fn omits_payment_term_when_only_net_payment_term_is_set() {
+        let input = CreateCustomerInput::new("customer_123".to_string()).with_net_payment_term(30);
+        let json = serde_json::to_value(&input).unwrap();
+
+        assert_eq!(json["net_payment_term"], 30);
+        assert!(json.get("payment_term").is_none());
+    }
+
+    #[test]
+    fn omits_net_payment_term_when_only_payment_term_is_set() {
+        let input = CreateCustomerInput::new("customer_123".to_string())
+            .with_payment_term(PaymentTerm::new(PaymentTermType::EndOfMonth));
+        let json = serde_json::to_value(&CreateCustomerRequest::new(input)).unwrap();
+
+        assert_eq!(
+            json["customer"]["payment_term"],
+            serde_json::json!({ "term_type": "end_of_month" })
+        );
+        assert!(json["customer"].get("net_payment_term").is_none());
+    }
+
+    #[test]
+    fn omits_unset_billing_configuration_fields() {
+        let billing_configuration = CreateCustomerBillingConfiguration {
+            invoice_grace_period: Some(3),
+            payment_provider: None,
+            payment_provider_code: None,
+            provider_customer_id: None,
+            sync: None,
+            sync_with_provider: None,
+            document_locale: None,
+            provider_payment_methods: None,
+        };
+        let input = CreateCustomerInput::new("customer_123".to_string())
+            .with_billing_configuration(billing_configuration);
+        let json = serde_json::to_value(&input).unwrap();
+
+        assert_eq!(
+            json["billing_configuration"],
+            serde_json::json!({ "invoice_grace_period": 3 })
+        );
     }
 }

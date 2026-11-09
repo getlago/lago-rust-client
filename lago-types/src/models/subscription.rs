@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 use uuid::Uuid;
 
+use super::payment_term::PaymentTerm;
+
 /// Represents a subscription in the Lago billing system.
 ///
 /// A subscription links a customer to a plan, defining their billing cycle
@@ -59,6 +61,8 @@ pub struct Subscription {
     pub activation_rules: Option<Vec<SubscriptionActivationRule>>,
     /// Purchase order number added to invoices generated for this subscription.
     pub purchase_order_number: Option<String>,
+    /// The subscription's own payment term; `None` when the customer's or billing entity's applies.
+    pub payment_term: Option<PaymentTerm>,
 }
 
 /// Billing time determines when recurring billing cycles occur.
