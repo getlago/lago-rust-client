@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::filters::common::ListFilters;
 use crate::filters::subscription::SubscriptionFilters;
-use crate::models::{PaginationParams, SubscriptionActivationRuleType, SubscriptionBillingTime};
+use crate::models::{
+    PaginationParams, PaymentTerm, SubscriptionActivationRuleType, SubscriptionBillingTime,
+};
 
 /// Request parameters for listing subscriptions.
 #[derive(Debug, Clone)]
@@ -130,6 +132,9 @@ pub struct CreateSubscriptionInput {
     /// Purchase order number added to invoices generated for this subscription.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub purchase_order_number: Option<String>,
+    /// Payment term of the subscription, overriding the customer's and billing entity's.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_term: Option<PaymentTerm>,
 }
 
 impl CreateSubscriptionInput {
@@ -146,6 +151,7 @@ impl CreateSubscriptionInput {
             plan_overrides: None,
             activation_rules: None,
             purchase_order_number: None,
+            payment_term: None,
         }
     }
 
@@ -199,6 +205,12 @@ impl CreateSubscriptionInput {
         self.purchase_order_number = Some(purchase_order_number);
         self
     }
+
+    /// Sets the payment term.
+    pub fn with_payment_term(mut self, payment_term: PaymentTerm) -> Self {
+        self.payment_term = Some(payment_term);
+        self
+    }
 }
 
 /// Request for creating a subscription.
@@ -240,6 +252,9 @@ pub struct UpdateSubscriptionInput {
     /// Purchase order number added to invoices generated for this subscription.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub purchase_order_number: Option<String>,
+    /// Payment term of the subscription, overriding the customer's and billing entity's.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_term: Option<PaymentTerm>,
 }
 
 impl UpdateSubscriptionInput {
@@ -253,6 +268,7 @@ impl UpdateSubscriptionInput {
             plan_overrides: None,
             activation_rules: None,
             purchase_order_number: None,
+            payment_term: None,
         }
     }
 
@@ -298,6 +314,12 @@ impl UpdateSubscriptionInput {
     /// Sets the purchase order number.
     pub fn with_purchase_order_number(mut self, purchase_order_number: String) -> Self {
         self.purchase_order_number = Some(purchase_order_number);
+        self
+    }
+
+    /// Sets the payment term.
+    pub fn with_payment_term(mut self, payment_term: PaymentTerm) -> Self {
+        self.payment_term = Some(payment_term);
         self
     }
 }
@@ -497,5 +519,65 @@ impl SubscriptionActivationRuleInput {
     pub fn with_timeout_hours(mut self, timeout_hours: i64) -> Self {
         self.timeout_hours = Some(timeout_hours);
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::PaymentTermType;
+
+    #[test]
+    fn update_omits_payment_term_when_unset() {
+        let request = UpdateSubscriptionRequest::new(
+            "sub_123".to_string(),
+            UpdateSubscriptionInput::new().with_name("Renamed".to_string()),
+        );
+        let json = serde_json::to_value(&request).unwrap();
+
+        assert_eq!(
+            json,
+            serde_json::json!({ "subscription": { "name": "Renamed" } })
+        );
+    }
+
+    #[test]
+    fn update_serializes_payment_term_when_set() {
+        let input = UpdateSubscriptionInput::new()
+            .with_payment_term(PaymentTerm::new(PaymentTermType::Net).with_days(45));
+        let json = serde_json::to_value(&input).unwrap();
+
+        assert_eq!(
+            json["payment_term"],
+            serde_json::json!({ "term_type": "net", "days": 45 })
+        );
+    }
+
+    #[test]
+    fn create_omits_payment_term_when_unset() {
+        let input = CreateSubscriptionInput::new("customer_123".to_string(), "plan".to_string());
+        let json = serde_json::to_value(&input).unwrap();
+
+        assert!(json.get("payment_term").is_none());
+    }
+
+    #[test]
+    fn create_serializes_payment_term_when_set() {
+        let input = CreateSubscriptionInput::new("customer_123".to_string(), "plan".to_string())
+            .with_payment_term(
+                PaymentTerm::new(PaymentTermType::DayOfMonth)
+                    .with_day_of_month(10)
+                    .with_month_offset(1),
+            );
+        let json = serde_json::to_value(&CreateSubscriptionRequest::new(input)).unwrap();
+
+        assert_eq!(
+            json["subscription"]["payment_term"],
+            serde_json::json!({
+                "term_type": "day_of_month",
+                "day_of_month": 10,
+                "month_offset": 1
+            })
+        );
     }
 }

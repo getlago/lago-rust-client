@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::models::PaginationParams;
+use crate::models::{PaginationParams, PaymentTerm};
 
 use crate::filters::{common::ListFilters, invoice::InvoiceFilters};
 
@@ -401,6 +401,10 @@ pub struct InvoicePreviewInput {
     pub subscriptions: Option<InvoicePreviewSubscriptions>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub billing_entity_code: Option<String>,
+    /// Payment term the preview is computed with, instead of the one resolved
+    /// from the subscription, the customer and the billing entity.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_term: Option<PaymentTerm>,
 }
 
 impl InvoicePreviewInput {
@@ -456,6 +460,11 @@ impl InvoicePreviewInput {
 
     pub fn with_billing_entity_code(mut self, code: String) -> Self {
         self.billing_entity_code = Some(code);
+        self
+    }
+
+    pub fn with_payment_term(mut self, payment_term: PaymentTerm) -> Self {
+        self.payment_term = Some(payment_term);
         self
     }
 }
@@ -582,6 +591,10 @@ pub struct CreateInvoiceInput {
     /// Optional purchase order number to associate with the invoice.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub purchase_order_number: Option<String>,
+    /// Payment term of the invoice, instead of the one resolved from the customer
+    /// and the billing entity.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub payment_term: Option<PaymentTerm>,
 }
 
 impl CreateInvoiceInput {
@@ -604,12 +617,19 @@ impl CreateInvoiceInput {
             currency,
             fees,
             purchase_order_number: None,
+            payment_term: None,
         }
     }
 
     /// Sets the purchase order number to associate with the invoice.
     pub fn with_purchase_order_number(mut self, purchase_order_number: String) -> Self {
         self.purchase_order_number = Some(purchase_order_number);
+        self
+    }
+
+    /// Sets the payment term of the invoice.
+    pub fn with_payment_term(mut self, payment_term: PaymentTerm) -> Self {
+        self.payment_term = Some(payment_term);
         self
     }
 }
@@ -923,6 +943,56 @@ impl VoidInvoiceRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::models::PaymentTermType;
+
+    #[test]
+    fn preview_omits_payment_term_when_unset() {
+        let input = InvoicePreviewInput::for_customer("customer_123".to_string());
+        let json = serde_json::to_value(&InvoicePreviewRequest::new(input)).unwrap();
+
+        assert!(json.get("payment_term").is_none());
+    }
+
+    #[test]
+    fn preview_serializes_payment_term_at_the_top_level() {
+        let input = InvoicePreviewInput::for_customer("customer_123".to_string())
+            .with_payment_term(PaymentTerm::new(PaymentTermType::Net).with_days(30));
+        let json = serde_json::to_value(&InvoicePreviewRequest::new(input)).unwrap();
+
+        assert_eq!(
+            json["payment_term"],
+            serde_json::json!({ "term_type": "net", "days": 30 })
+        );
+        assert!(json["customer"].get("payment_term").is_none());
+    }
+
+    #[test]
+    fn one_off_invoice_omits_payment_term_when_unset() {
+        let input = CreateInvoiceInput::new(
+            "customer_123".to_string(),
+            "EUR".to_string(),
+            vec![CreateInvoiceFeeInput::new("setup_fee".to_string(), 1.0)],
+        );
+        let json = serde_json::to_value(&CreateInvoiceRequest::new(input)).unwrap();
+
+        assert!(json["invoice"].get("payment_term").is_none());
+    }
+
+    #[test]
+    fn one_off_invoice_serializes_payment_term_when_set() {
+        let input = CreateInvoiceInput::new(
+            "customer_123".to_string(),
+            "EUR".to_string(),
+            vec![CreateInvoiceFeeInput::new("setup_fee".to_string(), 1.0)],
+        )
+        .with_payment_term(PaymentTerm::new(PaymentTermType::DueOnReceipt));
+        let json = serde_json::to_value(&CreateInvoiceRequest::new(input)).unwrap();
+
+        assert_eq!(
+            json["invoice"]["payment_term"],
+            serde_json::json!({ "term_type": "due_on_receipt" })
+        );
+    }
 
     #[test]
     fn service_period_is_omitted_when_unset() {

@@ -96,14 +96,22 @@ impl GetBillableMetricRequest {
 pub struct CreateBillableMetricInput {
     pub name: String,
     pub code: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub aggregation_type: BillableMetricAggregationType,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub recurring: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rounding_function: Option<BillableMetricRoundingFunction>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rounding_precision: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub expression: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub field_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub weighted_interval: Option<BillableMetricWeightedInterval>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub filters: Option<Vec<BillableMetricFilterModel>>,
 }
 

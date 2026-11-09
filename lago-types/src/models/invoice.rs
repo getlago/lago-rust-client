@@ -4,6 +4,7 @@ use strum_macros::EnumString;
 use uuid::Uuid;
 
 use super::customer::Customer;
+use super::payment_term::PaymentTerm;
 use super::usage_threshold::UsageThreshold;
 
 /// Represents an invoice in the Lago billing system.
@@ -41,6 +42,7 @@ pub struct Invoice {
     pub payment_due_date: Option<String>,
     pub payment_overdue: Option<bool>,
     pub net_payment_term: Option<i32>,
+    pub payment_term: Option<PaymentTerm>,
     pub self_billed: Option<bool>,
     pub voided_at: Option<DateTime<Utc>>,
     pub file_url: Option<String>,
@@ -265,6 +267,7 @@ pub struct InvoiceAppliedUsageThreshold {
 mod tests {
     use super::*;
     use crate::models::customer::{CustomerIntegrationType, CustomerPaymentProvider};
+    use crate::models::payment_term::PaymentTermType;
 
     fn invoice_json(integration_type: &str, payment_provider: &str) -> String {
         format!(
@@ -285,6 +288,8 @@ mod tests {
                 "prepaid_credit_amount_cents": 0,
                 "progressive_billing_credit_amount_cents": 0,
                 "total_amount_cents": 120,
+                "net_payment_term": 30,
+                "payment_term": {{ "term_type": "net", "days": 30 }},
                 "created_at": "2026-10-01T00:00:00Z",
                 "updated_at": "2026-10-01T00:00:00Z",
                 "customer": {{
@@ -332,5 +337,16 @@ mod tests {
             customer.billing_configuration.payment_provider,
             Some(CustomerPaymentProvider::Moneyhash)
         ));
+    }
+
+    #[test]
+    fn deserializes_the_payment_term_and_its_legacy_alias() {
+        let invoice: Invoice = serde_json::from_str(&invoice_json("anrok", "stripe")).unwrap();
+
+        assert_eq!(invoice.net_payment_term, Some(30));
+        assert_eq!(
+            invoice.payment_term,
+            Some(PaymentTerm::new(PaymentTermType::Net).with_days(30))
+        );
     }
 }

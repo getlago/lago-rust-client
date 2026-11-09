@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use strum_macros::EnumString;
 use uuid::Uuid;
 
+use super::payment_term::PaymentTerm;
+
 /// Represents a customer in the Lago billing system.
 ///
 /// This struct contains all the information about a customer, including
@@ -38,6 +40,7 @@ pub struct Customer {
     pub url: Option<String>,
     pub zipcode: Option<String>,
     pub net_payment_term: Option<i32>,
+    pub payment_term: Option<PaymentTerm>,
     pub updated_at: DateTime<Utc>,
     pub finalize_zero_amount_invoice: CustomerFinalizeZeroAmountInvoice,
     pub skip_invoice_custom_sections: bool,
@@ -160,6 +163,7 @@ pub enum CustomerIntegrationType {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::models::PaymentTermType;
     use std::str::FromStr;
 
     fn integration_json(integration_type: &str, sync_with_provider: &str) -> String {
@@ -265,6 +269,58 @@ mod tests {
             serde_json::from_str(&integration_json("anrok", r#""sync_with_provider": true,"#))
                 .unwrap();
         assert!(integration.sync_with_provider);
+    }
+
+    #[test]
+    fn deserializes_the_payment_term_and_its_legacy_alias() {
+        let json = r#"{
+            "lago_id": "2b012b01-2b01-2b01-2b01-2b012b012b01",
+            "external_id": "customer_123",
+            "applicable_timezone": "UTC",
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+            "billing_entity_code": "default",
+            "account_type": "customer",
+            "finalize_zero_amount_invoice": "inherit",
+            "skip_invoice_custom_sections": false,
+            "net_payment_term": null,
+            "payment_term": { "term_type": "end_of_month" },
+            "billing_configuration": {},
+            "shipping_address": {},
+            "metadata": [],
+            "integration_customers": []
+        }"#;
+        let customer: Customer = serde_json::from_str(json).unwrap();
+
+        assert!(customer.net_payment_term.is_none());
+        assert_eq!(
+            customer.payment_term,
+            Some(PaymentTerm::new(PaymentTermType::EndOfMonth))
+        );
+    }
+
+    #[test]
+    fn deserializes_a_customer_without_a_payment_term() {
+        let json = r#"{
+            "lago_id": "2b012b01-2b01-2b01-2b01-2b012b012b01",
+            "external_id": "customer_123",
+            "applicable_timezone": "UTC",
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+            "billing_entity_code": "default",
+            "account_type": "customer",
+            "finalize_zero_amount_invoice": "inherit",
+            "skip_invoice_custom_sections": false,
+            "net_payment_term": 30,
+            "billing_configuration": {},
+            "shipping_address": {},
+            "metadata": [],
+            "integration_customers": []
+        }"#;
+        let customer: Customer = serde_json::from_str(json).unwrap();
+
+        assert_eq!(customer.net_payment_term, Some(30));
+        assert!(customer.payment_term.is_none());
     }
 
     #[test]
