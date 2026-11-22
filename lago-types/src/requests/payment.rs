@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::filters::{common::ListFilters, payment::PaymentFilters};
 use crate::models::PaginationParams;
 
 /// Request parameters for listing payments.
@@ -12,6 +13,8 @@ pub struct ListPaymentsRequest {
     pub pagination: PaginationParams,
     pub external_customer_id: Option<String>,
     pub invoice_id: Option<Uuid>,
+    /// Additional payment list filters.
+    pub filters: PaymentFilters,
 }
 
 impl ListPaymentsRequest {
@@ -59,6 +62,12 @@ impl ListPaymentsRequest {
         self
     }
 
+    /// Sets payment filters for this list request.
+    pub fn with_filters(mut self, filters: PaymentFilters) -> Self {
+        self.filters = filters;
+        self
+    }
+
     /// Converts the request parameters into HTTP query parameters.
     ///
     /// # Returns
@@ -74,6 +83,7 @@ impl ListPaymentsRequest {
             params.push(("invoice_id", invoice_id.to_string()));
         }
 
+        params.extend(self.filters.to_query_params());
         params
     }
 }
@@ -113,6 +123,8 @@ pub struct ListCustomerPaymentsRequest {
     pub pagination: PaginationParams,
     /// Optional invoice ID filter.
     pub invoice_id: Option<Uuid>,
+    /// Additional payment list filters.
+    pub filters: PaymentFilters,
 }
 
 impl ListCustomerPaymentsRequest {
@@ -128,6 +140,7 @@ impl ListCustomerPaymentsRequest {
             external_customer_id,
             pagination: PaginationParams::default(),
             invoice_id: None,
+            filters: PaymentFilters::default(),
         }
     }
 
@@ -155,6 +168,12 @@ impl ListCustomerPaymentsRequest {
         self
     }
 
+    /// Sets payment filters for this list request.
+    pub fn with_filters(mut self, filters: PaymentFilters) -> Self {
+        self.filters = filters;
+        self
+    }
+
     /// Converts the request parameters into HTTP query parameters.
     ///
     /// # Returns
@@ -166,6 +185,7 @@ impl ListCustomerPaymentsRequest {
             params.push(("invoice_id", invoice_id.to_string()));
         }
 
+        params.extend(self.filters.to_query_params());
         params
     }
 }

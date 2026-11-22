@@ -55,12 +55,5 @@ jobs:
     - name: Build packages
       run: cargo build --release --all-features
 
-    - name: Test dry run publish (lago-types)
-      run: |
-        cd lago-types
-        cargo publish --dry-run --verbose
-
-    - name: Test dry run publish (lago-client)
-      run: |
-        cd lago-client
-        cargo publish --dry-run --verbose
+    - name: Test dry run publish (workspace)
+      run: cargo publish --workspace --dry-run --verbose

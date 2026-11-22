@@ -394,3 +394,33 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: [API Documentation](https://doc.getlago.com/)
 - **Issues**: [GitHub Issues](https://github.com/getlago/lago-rust-client/issues)
 - **Community**: [Lago Community](https://www.getlago.com/community)
+### Payment list filters
+
+Both payment lists accept `PaymentFilters`. Filters combine with AND; entries
+within a vector combine with OR. Amounts are inclusive, nonnegative `i64` cents;
+receipt and invoice numbers match exactly, ignoring case. Date bounds use the
+organization's timezone and include both boundary days.
+
+```rust
+use lago_types::{
+    filters::payment::PaymentFilters,
+    models::payment::PaymentStatus,
+    requests::payment::{ListPaymentsRequest, ListCustomerPaymentsRequest},
+};
+
+let filters = PaymentFilters::new()
+    .with_payment_status(vec![PaymentStatus::Succeeded, PaymentStatus::Failed])
+    .with_currency("EUR".into())
+    .with_amount_from(5_000_000_000);
+let payments = client.list_payments(Some(
+    ListPaymentsRequest::new().with_filters(filters.clone()),
+)).await?;
+let customer_payments = client.list_customer_payments(
+    ListCustomerPaymentsRequest::new("cust_1".into()).with_filters(filters),
+).await?;
+```
+
+Additional builders cover `payment_statuses` (alias), `amount_to`, `receipt_number`,
+`created_at_from`, `created_at_to`, `payment_provider_type`, `invoice_number`,
+`payment_type`, `payable_type` and `search_term`. Existing
+pagination, invoice ID and external customer ID builders still apply.
