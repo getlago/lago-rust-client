@@ -30,6 +30,7 @@ pub struct Invoice {
     pub sub_total_including_taxes_amount_cents: i64,
     pub prepaid_credit_amount_cents: i64,
     pub progressive_billing_credit_amount_cents: i64,
+    pub progressive_billing_trigger: Option<InvoiceProgressiveBillingTrigger>,
     pub total_amount_cents: i64,
     pub total_due_amount_cents: Option<i64>,
     pub total_paid_amount_cents: Option<i64>,
@@ -193,6 +194,15 @@ pub enum InvoicePaymentStatus {
     Failed,
 }
 
+/// Defines what triggered a progressive billing invoice.
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum InvoiceProgressiveBillingTrigger {
+    UsageThreshold,
+    WalletExpiration,
+}
+
 /// Represents a billing period associated with an invoice.
 ///
 /// This struct contains information about the subscription and charge periods
@@ -331,6 +341,27 @@ mod tests {
         assert!(matches!(
             customer.billing_configuration.payment_provider,
             Some(CustomerPaymentProvider::Moneyhash)
+        ));
+    }
+
+    #[test]
+    fn deserializes_an_invoice_without_progressive_billing_trigger() {
+        let invoice: Invoice = serde_json::from_str(&invoice_json("hubspot", "moneyhash")).unwrap();
+
+        assert!(invoice.progressive_billing_trigger.is_none());
+    }
+
+    #[test]
+    fn deserializes_the_progressive_billing_trigger() {
+        let json = invoice_json("hubspot", "moneyhash").replace(
+            r#""progressive_billing_credit_amount_cents": 0,"#,
+            r#""progressive_billing_credit_amount_cents": 0, "progressive_billing_trigger": "wallet_expiration","#,
+        );
+        let invoice: Invoice = serde_json::from_str(&json).unwrap();
+
+        assert!(matches!(
+            invoice.progressive_billing_trigger,
+            Some(InvoiceProgressiveBillingTrigger::WalletExpiration)
         ));
     }
 }
