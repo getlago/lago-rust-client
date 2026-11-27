@@ -201,6 +201,10 @@ pub enum InvoicePaymentStatus {
 pub enum InvoiceProgressiveBillingTrigger {
     UsageThreshold,
     WalletExpiration,
+    /// A trigger added to the API after this version of the client, kept as sent.
+    #[serde(untagged)]
+    #[strum(disabled)]
+    Unknown(String),
 }
 
 /// Represents a billing period associated with an invoice.
@@ -351,17 +355,49 @@ mod tests {
         assert!(invoice.progressive_billing_trigger.is_none());
     }
 
+    fn invoice_with_trigger(trigger: &str) -> Invoice {
+        let anchor = r#""progressive_billing_credit_amount_cents": 0,"#;
+        let field = format!(r#""progressive_billing_trigger": {trigger},"#);
+        let template = invoice_json("hubspot", "moneyhash");
+        let json = template.replace(anchor, &format!("{anchor} {field}"));
+
+        serde_json::from_str(&json).unwrap()
+    }
+
     #[test]
-    fn deserializes_the_progressive_billing_trigger() {
-        let json = invoice_json("hubspot", "moneyhash").replace(
-            r#""progressive_billing_credit_amount_cents": 0,"#,
-            r#""progressive_billing_credit_amount_cents": 0, "progressive_billing_trigger": "wallet_expiration","#,
-        );
-        let invoice: Invoice = serde_json::from_str(&json).unwrap();
+    fn deserializes_a_wallet_expiration_trigger() {
+        let invoice = invoice_with_trigger(r#""wallet_expiration""#);
 
         assert!(matches!(
             invoice.progressive_billing_trigger,
             Some(InvoiceProgressiveBillingTrigger::WalletExpiration)
+        ));
+    }
+
+    #[test]
+    fn deserializes_a_usage_threshold_trigger() {
+        let invoice = invoice_with_trigger(r#""usage_threshold""#);
+
+        assert!(matches!(
+            invoice.progressive_billing_trigger,
+            Some(InvoiceProgressiveBillingTrigger::UsageThreshold)
+        ));
+    }
+
+    #[test]
+    fn deserializes_a_null_trigger() {
+        let invoice = invoice_with_trigger("null");
+
+        assert!(invoice.progressive_billing_trigger.is_none());
+    }
+
+    #[test]
+    fn deserializes_an_unknown_trigger() {
+        let invoice = invoice_with_trigger(r#""manual""#);
+
+        assert!(matches!(
+            invoice.progressive_billing_trigger,
+            Some(InvoiceProgressiveBillingTrigger::Unknown(ref trigger)) if trigger == "manual"
         ));
     }
 }
