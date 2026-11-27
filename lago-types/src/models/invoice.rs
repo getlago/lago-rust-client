@@ -30,6 +30,7 @@ pub struct Invoice {
     pub sub_total_including_taxes_amount_cents: i64,
     pub prepaid_credit_amount_cents: i64,
     pub progressive_billing_credit_amount_cents: i64,
+    pub progressive_billing_trigger: Option<InvoiceProgressiveBillingTrigger>,
     pub total_amount_cents: i64,
     pub total_due_amount_cents: Option<i64>,
     pub total_paid_amount_cents: Option<i64>,
@@ -193,6 +194,19 @@ pub enum InvoicePaymentStatus {
     Failed,
 }
 
+/// Defines what triggered a progressive billing invoice.
+#[derive(Debug, Clone, Serialize, Deserialize, EnumString)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum InvoiceProgressiveBillingTrigger {
+    UsageThreshold,
+    WalletExpiration,
+    /// A trigger added to the API after this version of the client, kept as sent.
+    #[serde(untagged)]
+    #[strum(disabled)]
+    Unknown(String),
+}
+
 /// Represents a billing period associated with an invoice.
 ///
 /// This struct contains information about the subscription and charge periods
@@ -331,6 +345,59 @@ mod tests {
         assert!(matches!(
             customer.billing_configuration.payment_provider,
             Some(CustomerPaymentProvider::Moneyhash)
+        ));
+    }
+
+    #[test]
+    fn deserializes_an_invoice_without_progressive_billing_trigger() {
+        let invoice: Invoice = serde_json::from_str(&invoice_json("hubspot", "moneyhash")).unwrap();
+
+        assert!(invoice.progressive_billing_trigger.is_none());
+    }
+
+    fn invoice_with_trigger(trigger: &str) -> Invoice {
+        let anchor = r#""progressive_billing_credit_amount_cents": 0,"#;
+        let field = format!(r#""progressive_billing_trigger": {trigger},"#);
+        let template = invoice_json("hubspot", "moneyhash");
+        let json = template.replace(anchor, &format!("{anchor} {field}"));
+
+        serde_json::from_str(&json).unwrap()
+    }
+
+    #[test]
+    fn deserializes_a_wallet_expiration_trigger() {
+        let invoice = invoice_with_trigger(r#""wallet_expiration""#);
+
+        assert!(matches!(
+            invoice.progressive_billing_trigger,
+            Some(InvoiceProgressiveBillingTrigger::WalletExpiration)
+        ));
+    }
+
+    #[test]
+    fn deserializes_a_usage_threshold_trigger() {
+        let invoice = invoice_with_trigger(r#""usage_threshold""#);
+
+        assert!(matches!(
+            invoice.progressive_billing_trigger,
+            Some(InvoiceProgressiveBillingTrigger::UsageThreshold)
+        ));
+    }
+
+    #[test]
+    fn deserializes_a_null_trigger() {
+        let invoice = invoice_with_trigger("null");
+
+        assert!(invoice.progressive_billing_trigger.is_none());
+    }
+
+    #[test]
+    fn deserializes_an_unknown_trigger() {
+        let invoice = invoice_with_trigger(r#""manual""#);
+
+        assert!(matches!(
+            invoice.progressive_billing_trigger,
+            Some(InvoiceProgressiveBillingTrigger::Unknown(ref trigger)) if trigger == "manual"
         ));
     }
 }
